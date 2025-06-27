@@ -1,0 +1,12 @@
+qiskit==2.0.2
+qiskit-aer==0.17.0
+qiskit-machine-learning==0.8.2
+scikit-learn
+scipy
+numpy
+pandas
+matplotlib
+seaborn
+scikit-optimize
+pylatexenc
+
