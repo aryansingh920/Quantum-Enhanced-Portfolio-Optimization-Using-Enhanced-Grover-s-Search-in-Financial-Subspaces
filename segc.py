@@ -106,6 +106,10 @@ class SEGCSearcher:
         self.subspace_scores = defaultdict(int)
         self.iteration_results = []
 
+        self.last_success_rates = []
+        self.decay_rate = 0.8  # exponential decay for score handling
+
+
     def analyze_subspace_distribution(self, counts, target_bits):
         """Analyze which subspaces are most promising based on measurement results."""
         subspace_counts = defaultdict(int)
@@ -208,6 +212,7 @@ class SEGCSearcher:
         best_result = None
         best_success_rate = 0.0
 
+
         for iteration in range(self.max_iterations):
             print(f"\n--- Iteration {iteration + 1} ---")
 
@@ -222,6 +227,7 @@ class SEGCSearcher:
             # Analyze results
             target_count = counts.get(target_bits, 0)
             success_rate = target_count / self.shots
+            self.last_success_rates.append(success_rate)
 
             print(
                 f"Target found: {target_count}/{self.shots} ({success_rate:.3f})")
@@ -236,8 +242,13 @@ class SEGCSearcher:
             print(
                 f"Best subspace: {best_subspace} (score: {best_subspace_score:.2f})")
 
-            # Update classical feedback
-            self.subspace_scores.update(subspace_scores)
+            # ✅ Apply exponential decay to existing scores
+            for subspace in self.subspace_scores:
+                self.subspace_scores[subspace] *= self.decay_rate
+            for subspace, score in subspace_scores.items():
+                self.subspace_scores[subspace] += score
+
+            # Store iteration data
             iteration_data = {
                 'iteration': iteration + 1,
                 'success_rate': success_rate,
@@ -253,10 +264,19 @@ class SEGCSearcher:
                 best_success_rate = success_rate
                 best_result = iteration_data
 
-            # Early stopping if we achieve high success rate
-            if success_rate > 0.9:
-                print(f"High success rate achieved! Stopping early.")
+            # ✅ Early stopping (more lenient)
+            if success_rate >= 0.89:
+                print("High success rate achieved! Stopping early.")
                 break
+
+            # ✅ Over-amplification correction
+            if len(self.last_success_rates) >= 3:
+                recent = self.last_success_rates[-3:]
+                if recent[2] < recent[1] < recent[0]:  # drop twice in a row
+                    print(
+                        "Warning: Over-amplification suspected. Reducing fine iterations.")
+                    self.max_iterations = iteration + 1
+                    break
 
             # Convergence check
             if iteration > 2:
@@ -265,6 +285,9 @@ class SEGCSearcher:
                 if max(recent_rates) - min(recent_rates) < 0.01:
                     print("Convergence detected. Stopping.")
                     break
+
+
+
 
         return best_result, self.search_history
 
