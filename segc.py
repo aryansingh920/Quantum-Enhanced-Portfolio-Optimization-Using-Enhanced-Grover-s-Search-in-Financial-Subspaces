@@ -193,6 +193,7 @@ class SEGCSearcher:
                       self.k_coarse), range(self.n_qubits))
 
         qc.measure(range(self.n_qubits), range(self.n_qubits))
+        qc.draw('mpl', scale=0.5, idle_wires=False, fold=-1)
         return qc
 
     def search_with_feedback(self, target_num):
