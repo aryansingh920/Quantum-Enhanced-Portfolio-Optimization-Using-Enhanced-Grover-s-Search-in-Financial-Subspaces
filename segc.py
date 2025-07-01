@@ -1,3 +1,13 @@
+"""
+Created on 01/07/2025
+
+@author: Aryan
+
+Filename: segc.py
+
+Relative Path: segc.py
+"""
+
 from math import floor, sqrt, pi, ceil
 from qiskit import QuantumCircuit, transpile
 from qiskit_aer import AerSimulator

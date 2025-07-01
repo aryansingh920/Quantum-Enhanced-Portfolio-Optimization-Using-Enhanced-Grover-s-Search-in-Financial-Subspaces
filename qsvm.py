@@ -1,3 +1,13 @@
+"""
+Created on 01/07/2025
+
+@author: Aryan
+
+Filename: qsvm.py
+
+Relative Path: qsvm.py
+"""
+
 import numpy as np
 import pandas as pd
 import matplotlib.pyplot as plt
