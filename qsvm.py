@@ -12,7 +12,7 @@ from qiskit import QuantumCircuit
 from qiskit_aer import AerSimulator
 
 # Load your data
-ticker = "AAPL"
+ticker = "JPM"
 df = pd.read_csv(f"ticker/{ticker}/{ticker}_data.csv", parse_dates=['Date'])
 df = df.dropna()
 
