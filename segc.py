@@ -387,7 +387,7 @@ Final Subspace Scores:
 def run_segc_demo():
     """Run SEGC demonstration with multiple targets."""
     # Test parameters
-    targets = [58, 42, 100]
+    targets = [117]
     n_qubits = 7
     k_coarse = 3
     shots = 2048

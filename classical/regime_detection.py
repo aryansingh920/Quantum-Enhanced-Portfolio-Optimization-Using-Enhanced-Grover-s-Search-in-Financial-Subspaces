@@ -7,7 +7,7 @@ from sklearn.metrics import classification_report, confusion_matrix, accuracy_sc
 from sklearn.pipeline import Pipeline
 import matplotlib.pyplot as plt
 import seaborn as sns
-from datetime import datetime
+from datetime import datetime, timedelta
 import warnings
 warnings.filterwarnings('ignore')
 
@@ -16,17 +16,20 @@ class SVMRegimeDetector:
     """
     SVM-based regime detection system for financial markets.
     Supports multiple kernels and hyperparameter optimization via Grid Search.
+    Enhanced with proper future regime prediction capabilities.
     """
 
-    def __init__(self, cv_folds=5, test_size=0.2, random_state=42):
+    def __init__(self, cv_folds=5, test_size=0.2, random_state=42, prediction_mode='future'):
         self.cv_folds = cv_folds
         self.test_size = test_size
         self.random_state = random_state
+        self.prediction_mode = prediction_mode  # 'current' or 'future'
         self.scaler = StandardScaler()
         self.label_encoder = LabelEncoder()
         self.best_model = None
         self.grid_search = None
         self.feature_names = None
+        self.df = None
 
     def load_data(self, csv_path):
         """Load and prepare data from CSV file."""
@@ -56,7 +59,8 @@ class SVMRegimeDetector:
         Args:
             feature_set: 'scaled', 'raw', or 'all'
         """
-        print(f"🔧 Preparing features (set: {feature_set})...")
+        print(
+            f"🔧 Preparing features (set: {feature_set}, mode: {self.prediction_mode})...")
 
         # Define feature columns based on set selection
         if feature_set == 'scaled':
@@ -82,6 +86,15 @@ class SVMRegimeDetector:
         # Prepare features and target
         X = self.df[feature_cols].fillna(method='ffill').fillna(method='bfill')
         y = self.df['regime'].fillna(method='ffill')
+
+        # 🔥 KEY MODIFICATION: Shift labels for future prediction
+        if self.prediction_mode == 'future':
+            print("🚀 Shifting labels for FUTURE regime prediction...")
+            y = y.shift(-1)  # Shift labels back by 1 day
+            # Drop the last row since it won't have a future regime
+            X = X.iloc[:-1]
+            y = y.iloc[:-1]
+            print("✅ Labels shifted: Features from day t → predict regime at t+1")
 
         # Remove any remaining NaN rows
         valid_mask = ~(X.isnull().any(axis=1) | y.isnull())
@@ -171,8 +184,14 @@ class SVMRegimeDetector:
                 'svm__class_weight': [None, 'balanced']
             })
 
-        print(
-            f"🔍 Grid search will test {sum(len(p['svm__C']) * len(p.get('svm__gamma', [1])) * len(p.get('svm__degree', [1])) * len(p['svm__class_weight']) for p in param_grid)} combinations")
+        total_combinations = sum(
+            len(p['svm__C']) *
+            len(p.get('svm__gamma', [1])) *
+            len(p.get('svm__degree', [1])) *
+            len(p['svm__class_weight'])
+            for p in param_grid
+        )
+        print(f"🔍 Grid search will test {total_combinations} combinations")
 
         return param_grid
 
@@ -269,6 +288,178 @@ class SVMRegimeDetector:
             'confusion_matrix': cm
         }
 
+    def predict_regime_for_date(self, target_date, feature_set='scaled'):
+        """
+        🎯 Predict regime for a specific date.
+        
+        Args:
+            target_date: String (YYYY-MM-DD) or datetime object
+            feature_set: Feature set to use for prediction
+            
+        Returns:
+            dict: Prediction results with regime, probability, and date info
+        """
+        if self.best_model is None:
+            raise ValueError(
+                "Model not trained yet! Call train_model() first.")
+
+        if self.df is None:
+            raise ValueError("No data loaded! Call load_data() first.")
+
+        # Convert target_date to datetime if it's a string
+        if isinstance(target_date, str):
+            target_date = pd.to_datetime(target_date)
+
+        print(
+            f"🎯 Predicting regime for date: {target_date.strftime('%Y-%m-%d')}")
+
+        # Determine the date to use for features
+        if self.prediction_mode == 'future':
+            # For future prediction, we need features from the day before target_date
+            feature_date = target_date - timedelta(days=1)
+            print(
+                f"📊 Using features from: {feature_date.strftime('%Y-%m-%d')} to predict {target_date.strftime('%Y-%m-%d')}")
+        else:
+            # For current prediction, use features from the same date
+            feature_date = target_date
+            print(
+                f"📊 Using features from: {feature_date.strftime('%Y-%m-%d')} to predict current regime")
+
+        # Check if feature_date exists in our data
+        if feature_date not in self.df.index:
+            # Find the closest available date
+            available_dates = self.df.index
+            closest_date = min(
+                available_dates, key=lambda x: abs((x - feature_date).days))
+            print(
+                f"⚠️  Exact date not found. Using closest available date: {closest_date.strftime('%Y-%m-%d')}")
+            feature_date = closest_date
+
+        # Get feature columns
+        if feature_set == 'scaled':
+            feature_cols = [
+                col for col in self.df.columns if col.endswith('_scaled')]
+        elif feature_set == 'raw':
+            feature_cols = ['close', 'high', 'low', 'open', 'volume',
+                            'ma5', 'ma20', 'rsi', 'returns', 'volatility']
+        elif feature_set == 'all':
+            feature_cols = [col for col in self.df.columns if col != 'regime']
+
+        # Filter existing columns and match training features
+        feature_cols = [
+            col for col in feature_cols if col in self.df.columns and col in self.feature_names]
+
+        if not feature_cols:
+            raise ValueError("No matching feature columns found!")
+
+        # Extract features for the specific date
+        try:
+            X_input = self.df.loc[[feature_date], feature_cols]
+        except KeyError:
+            raise ValueError(f"Date {feature_date} not found in dataset!")
+
+        # Handle missing values
+        X_input = X_input.fillna(method='ffill').fillna(method='bfill')
+
+        if X_input.isnull().any().any():
+            print(
+                "⚠️  Warning: Some features have missing values. Prediction may be unreliable.")
+
+        # Make prediction
+        prediction_encoded = self.best_model.predict(X_input)[0]
+        predicted_regime = self.label_encoder.inverse_transform([prediction_encoded])[
+            0]
+
+        # Get prediction probabilities
+        try:
+            probabilities = self.best_model.predict_proba(X_input)[0]
+            prob_dict = dict(zip(self.label_encoder.classes_, probabilities))
+            max_prob = probabilities.max()
+        except AttributeError:
+            prob_dict = None
+            max_prob = None
+            print("⚠️  Probability predictions not available for this model")
+
+        # Get actual regime if available (for validation)
+        actual_regime = None
+        if target_date in self.df.index and 'regime' in self.df.columns:
+            actual_regime = self.df.loc[target_date, 'regime']
+
+        # Prepare results
+        results = {
+            'target_date': target_date,
+            'feature_date': feature_date,
+            'predicted_regime': predicted_regime,
+            'prediction_confidence': max_prob,
+            'all_probabilities': prob_dict,
+            'actual_regime': actual_regime,
+            'prediction_mode': self.prediction_mode,
+            'features_used': feature_cols
+        }
+
+        # Print results
+        print(f"\n🎯 PREDICTION RESULTS")
+        print(f"📅 Target Date: {target_date.strftime('%Y-%m-%d')}")
+        print(f"📊 Feature Date: {feature_date.strftime('%Y-%m-%d')}")
+        print(f"🔮 Predicted Regime: {predicted_regime}")
+        if max_prob:
+            print(f"📈 Confidence: {max_prob:.4f}")
+        if actual_regime:
+            print(f"✅ Actual Regime: {actual_regime}")
+            print(f"🎯 Correct: {predicted_regime == actual_regime}")
+
+        if prob_dict:
+            print(f"\n📊 All Regime Probabilities:")
+            for regime, prob in sorted(prob_dict.items(), key=lambda x: x[1], reverse=True):
+                print(f"   {regime}: {prob:.4f}")
+
+        return results
+
+    def predict_next_n_days(self, start_date, n_days, feature_set='scaled'):
+        """
+        Predict regimes for the next N days starting from start_date.
+        
+        Args:
+            start_date: Starting date for predictions
+            n_days: Number of days to predict
+            feature_set: Feature set to use
+            
+        Returns:
+            DataFrame with predictions
+        """
+        if isinstance(start_date, str):
+            start_date = pd.to_datetime(start_date)
+
+        print(
+            f"🔮 Predicting regimes for {n_days} days starting from {start_date.strftime('%Y-%m-%d')}")
+
+        predictions = []
+
+        for i in range(n_days):
+            current_date = start_date + timedelta(days=i)
+
+            try:
+                result = self.predict_regime_for_date(
+                    current_date, feature_set)
+                predictions.append({
+                    'date': current_date,
+                    'predicted_regime': result['predicted_regime'],
+                    'confidence': result['prediction_confidence'],
+                    'actual_regime': result['actual_regime']
+                })
+                print(
+                    f"Day {i+1}: {current_date.strftime('%Y-%m-%d')} → {result['predicted_regime']}")
+            except Exception as e:
+                print(
+                    f"❌ Error predicting for {current_date.strftime('%Y-%m-%d')}: {str(e)}")
+                continue
+
+        # Convert to DataFrame
+        predictions_df = pd.DataFrame(predictions)
+        predictions_df.set_index('date', inplace=True)
+
+        return predictions_df
+
     def analyze_grid_search_results(self, top_n=10):
         """Analyze and visualize grid search results."""
         if self.grid_search is None:
@@ -312,25 +503,6 @@ class SVMRegimeDetector:
         plt.show()
 
         return top_results
-
-    def predict_regime(self, X_new):
-        """Predict regime for new data."""
-        if self.best_model is None:
-            raise ValueError("Model not trained yet!")
-
-        predictions = self.best_model.predict(X_new)
-
-        # Only get probabilities if available
-        try:
-            probabilities = self.best_model.predict_proba(X_new)
-        except AttributeError:
-            probabilities = None
-            print("⚠️  Probability predictions not available for this model")
-
-        # Convert back to regime names
-        regime_predictions = self.label_encoder.inverse_transform(predictions)
-
-        return regime_predictions, probabilities
 
     def plot_regime_timeline(self, X_test, y_test, y_pred, sample_dates=None):
         """Plot regime predictions over time."""
@@ -400,14 +572,17 @@ class SVMRegimeDetector:
 
         return feature_importance
 
-# Example usage and main execution
-
 
 def main():
     """Main execution function with comprehensive workflow."""
 
-    # Initialize detector
-    detector = SVMRegimeDetector(cv_folds=5, test_size=0.2, random_state=42)
+    # 🔥 Initialize detector with FUTURE prediction mode
+    detector = SVMRegimeDetector(
+        cv_folds=5,
+        test_size=0.2,
+        random_state=42,
+        prediction_mode='future'  # This is the key change!
+    )
 
     # Load data (replace with your CSV path)
     csv_path = "ticker/AAPL/AAPL_data.csv"  # Update this path
@@ -427,7 +602,7 @@ def main():
 
     # Train model with comprehensive grid search
     print("\n" + "="*60)
-    print("🤖 TRAINING SVM WITH GRID SEARCH")
+    print("🤖 TRAINING SVM WITH GRID SEARCH (FUTURE PREDICTION MODE)")
     print("="*60)
 
     best_model = detector.train_model(
@@ -445,6 +620,25 @@ def main():
 
     results = detector.evaluate_model(X_test, y_test)
 
+    # 🎯 PREDICT FOR SPECIFIC DATES
+    print("\n" + "="*60)
+    print("🔮 PREDICTING FOR SPECIFIC DATES")
+    print("="*60)
+
+    # Example 1: Predict for a specific date
+    target_date = "2023-12-15"  # Change this to your desired date
+    prediction_result = detector.predict_regime_for_date(target_date)
+
+    # Example 2: Predict for multiple dates
+    print("\n" + "-"*40)
+    print("📅 MULTIPLE DATE PREDICTIONS")
+    print("-"*40)
+
+    start_date = "2025-07-01"
+    predictions_df = detector.predict_next_n_days(start_date, n_days=10)
+    print(f"\n📊 Predictions Summary:")
+    print(predictions_df)
+
     # Analyze grid search results
     print("\n" + "="*60)
     print("🔍 GRID SEARCH ANALYSIS")
@@ -452,24 +646,12 @@ def main():
 
     top_results = detector.analyze_grid_search_results(top_n=5)
 
-    # Feature importance (if linear kernel)
-    if detector.best_model.named_steps['svm'].kernel == 'linear':
-        print("\n" + "="*60)
-        print("📈 FEATURE IMPORTANCE")
-        print("="*60)
-        detector.feature_importance_analysis()
-
-    # Plot regime timeline
-    sample_dates = df.index[-len(y_test):] if hasattr(df.index,
-                                                      'to_pydatetime') else None
-    detector.plot_regime_timeline(
-        X_test, y_test, results['predictions'], sample_dates)
-
     print("\n" + "="*60)
     print("✅ REGIME DETECTION ANALYSIS COMPLETE")
     print("="*60)
     print(f"🎯 Final Test Accuracy: {results['accuracy']:.4f}")
     print(f"🏆 Best Model: {detector.grid_search.best_params_}")
+    print(f"🔮 Prediction Mode: {detector.prediction_mode}")
 
 
 if __name__ == "__main__":
