@@ -107,7 +107,8 @@ class QuantumSVMWithSEGC:
             fidelity = np.abs(np.conj(psi1.data) @ psi2.data) ** 2
 
             # If SEGC is enabled, use it to optimize the fidelity computation
-            if self.use_segc and self.segc_searcher is not None:
+            # if self.use_segc and self.segc_searcher is not None:
+            if False:  # Placeholder for SEGC usage
                 # Convert fidelity to a discrete optimization problem
                 # Scale fidelity to integer range for SEGC
                 target_fidelity = int(
@@ -468,7 +469,7 @@ def main():
     # Generate dataset
     print("\n1. Generating Dataset...")
     # Smaller dataset for faster computation
-    X, y = make_moons(n_samples=80, noise=0.1, random_state=42)
+    X, y = make_moons(n_samples=20, noise=0.1, random_state=42)
 
     # Standardize features
     scaler = StandardScaler()
