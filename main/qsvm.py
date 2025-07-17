@@ -14,12 +14,13 @@ from collections import defaultdict
 from sklearn.svm import SVC
 from sklearn.model_selection import train_test_split
 from sklearn.metrics import accuracy_score
-
+from sklearn.model_selection import KFold
 # --- SEGC primitives ---
 from segc.segc import diffuser, coarse_oracle, fine_oracle_subspace, diffuser_subspace, SEGCSearcher
 
 # --- Kernel ---
 from kernel_utils import compute_simplified_kernel
+
 
 class OptimizedSEGCSearcher(SEGCSearcher):
     def __init__(self, n_qubits=4, k_coarse=2, shots=256,
@@ -122,70 +123,120 @@ class OptimizedQuantumSVMWithSEGC:
             except:
                 continue
         return best_C
-    
-    def fit(self, X, y, features):
+
+    def fit(self, X, y, features, feature_mask=None):
         start_time = time.time()
         self.y_train = y
 
-        data_characteristics = {
-            'size': len(X),
-            'complexity': 'high' if X.shape[1] > 4 else 'medium'
-        }
-        params = self.segc_searcher.analyze_parameters(data_characteristics)
-        print(f"SEGC Parameter Analysis: {params}")
+        if feature_mask is not None:
+            X = X[:, feature_mask]
+            self.feature_indices = feature_mask
+            self.segc_stats = {'selected_features': [
+                features[i] for i in feature_mask]}
+        else:
+            data_characteristics = {
+                'size': len(X),
+                'complexity': 'high' if X.shape[1] > 4 else 'medium'
+            }
+            params = self.segc_searcher.analyze_parameters(
+                data_characteristics)
+            print(f"SEGC Parameter Analysis: {params}")
 
-        X_train, X_val, y_train, y_val = train_test_split(
-            X, y, test_size=0.2, random_state=42)
-        target_value, feature_indices = self.map_features_to_target_value(
-            X_train, y_train, top_k=params['recommended_k_coarse'])
-        self.feature_indices = feature_indices
+            X_train, X_val, y_train, y_val = train_test_split(
+                X, y, test_size=0.2, random_state=42)
+            target_value, feature_indices = self.map_features_to_target_value(
+                X_train, y_train, top_k=params['recommended_k_coarse'])
+            self.feature_indices = feature_indices
 
-        # Updated: only pass target_value as expected by simplified SEGCSearcher
-        best_result, search_history = self.segc_searcher.search_with_feedback(
-            target_value)
+            # Updated: only pass target_value as expected by simplified SEGCSearcher
+            best_result, search_history = self.segc_searcher.search_with_feedback(
+                target_value)
 
-        self.X_train_selected = X_train[:, feature_indices]
+            self.segc_stats = {
+                'parameter_analysis': params,
+                'search_history': search_history,
+                'subspace_scores': dict(self.segc_searcher.subspace_scores),
+                'selected_features': [features[i] for i in feature_indices]
+            }
+
+        self.X_train_selected = X[:, self.feature_indices]
         kernel_matrix = compute_simplified_kernel(self.X_train_selected)
-        C = self.optimize_hyperparameters(self.X_train_selected, y_train)
+        C = self.optimize_hyperparameters(self.X_train_selected, y)
         print(f"Training final SVM with C={C:.3f}...")
         self.classifier = SVC(kernel='precomputed', C=C)
-        self.classifier.fit(kernel_matrix, y_train)
+        self.classifier.fit(kernel_matrix, y)
 
         self.training_time = time.time() - start_time
-        self.segc_stats = {
-            'parameter_analysis': params,
-            'search_history': search_history,
-            'subspace_scores': dict(self.segc_searcher.subspace_scores),
-            'selected_features': [features[i] for i in feature_indices]
-        }
         return self
 
-
-    def predict(self, X):
+    def predict(self, X, feature_mask=None):
         if self.classifier is None:
             raise ValueError("Model not fitted!")
-        X_selected = X[:, self.feature_indices]
+        if feature_mask is not None:
+            X_selected = X[:, feature_mask]
+        else:
+            X_selected = X[:, self.feature_indices]
         kernel_matrix = compute_simplified_kernel(
             X_selected, self.X_train_selected)
         return self.classifier.predict(kernel_matrix)
 
-    def score(self, X, y):
-        return accuracy_score(y, self.predict(X))
+    def score(self, X, y, feature_mask=None, noise_level=0.0):
+        if self.classifier is None:
+            raise ValueError("Model not fitted!")
+        if feature_mask is not None:
+            X_selected = X[:, feature_mask]
+        else:
+            X_selected = X[:, self.feature_indices]
 
-    def plot_results(self, features, X, y):
+        # Perform k-fold cross-validation for subspace evaluation
+        kfold = KFold(n_splits=5, shuffle=True, random_state=42)
+        cv_scores = []
+        for train_idx, val_idx in kfold.split(X_selected):
+            X_fold_train, X_fold_val = X_selected[train_idx], X_selected[val_idx]
+            y_fold_train, y_fold_val = y[train_idx], y[val_idx]
+
+            # Compute kernel matrices for the fold
+            train_kernel = compute_simplified_kernel(X_fold_train)
+            val_kernel = compute_simplified_kernel(X_fold_val, X_fold_train)
+
+            # Train a temporary SVM for this fold
+            temp_clf = SVC(kernel='precomputed', C=self.classifier.C)
+            temp_clf.fit(train_kernel, y_fold_train)
+
+            # Evaluate on validation fold
+            fold_score = accuracy_score(
+                y_fold_val, temp_clf.predict(val_kernel))
+            cv_scores.append(fold_score)
+
+        # Average the cross-validation scores
+        score = np.mean(cv_scores)
+
+        # Inject noise if specified
+        if noise_level > 0:
+            noise = np.random.normal(0, noise_level, 1)[0]
+            score = max(0.0, min(1.0, score + noise))
+        return score
+
+    def plot_results(self, features, X, y, noise_level=0.0):
         import matplotlib.pyplot as plt
         fig, ((ax1, ax2), (ax3, ax4)) = plt.subplots(2, 2, figsize=(15, 12))
 
         iterations = [h['iteration']
-                      for h in self.segc_stats['search_history']]
+                      for h in self.segc_stats['search_history']] if self.segc_stats.get('search_history') else []
         success_rates = [h['success_rate']
-                         for h in self.segc_stats['search_history']]
-        ax1.plot(iterations, success_rates, 'bo-', linewidth=2, markersize=8)
-        ax1.set_xlabel('Iteration')
-        ax1.set_ylabel('Validation Accuracy')
-        ax1.set_title('SEGC-QSVM Convergence')
-        ax1.grid(True, alpha=0.3)
-        ax1.set_ylim(0, 1)
+                         for h in self.segc_stats['search_history']] if self.segc_stats.get('search_history') else []
+        if iterations:
+            ax1.plot(iterations, success_rates,
+                     'bo-', linewidth=2, markersize=8)
+            ax1.set_xlabel('Iteration')
+            ax1.set_ylabel('Validation Accuracy')
+            ax1.set_title('SEGC-QSVM Convergence')
+            ax1.grid(True, alpha=0.3)
+            ax1.set_ylim(0, 1)
+        else:
+            ax1.text(0.5, 0.5, 'No SEGC Search (Fixed Features)',
+                     ha='center', va='center')
+            ax1.axis('off')
 
         corrs = self.compute_feature_target_corr(X, y)
         ax2.bar(features, corrs, color='skyblue', alpha=0.7)
@@ -194,7 +245,7 @@ class OptimizedQuantumSVMWithSEGC:
         ax2.set_title('Feature Importance')
         ax2.tick_params(axis='x', rotation=45)
 
-        subspace_scores = self.segc_stats['subspace_scores']
+        subspace_scores = self.segc_stats.get('subspace_scores', {})
         if subspace_scores:
             subspaces = list(subspace_scores.keys())[:5]
             scores = [subspace_scores[sub] for sub in subspaces]
@@ -203,13 +254,19 @@ class OptimizedQuantumSVMWithSEGC:
             ax3.set_ylabel('Score')
             ax3.set_title('Top Subspace Scores')
             ax3.tick_params(axis='x', rotation=45)
+        else:
+            ax3.text(0.5, 0.5, 'No Subspace Scores (Fixed Features)',
+                     ha='center', va='center')
+            ax3.axis('off')
 
         ax4.axis('off')
         summary_text = f"""SEGC-QSVM Summary
 Selected Features: {', '.join(self.segc_stats['selected_features'])}
-Best Validation Accuracy: {max(success_rates):.3f}
 Training Time: {self.training_time:.2f}s
-SEGC Parameters:
+Noise Level: {noise_level:.3f}
+"""
+        if self.segc_stats.get('parameter_analysis'):
+            summary_text += f"""SEGC Parameters:
 • n_qubits: {self.segc_stats['parameter_analysis']['recommended_qubits']}
 • k_coarse: {self.segc_stats['parameter_analysis']['recommended_k_coarse']}
 • shots: {self.segc_stats['parameter_analysis']['recommended_shots']}

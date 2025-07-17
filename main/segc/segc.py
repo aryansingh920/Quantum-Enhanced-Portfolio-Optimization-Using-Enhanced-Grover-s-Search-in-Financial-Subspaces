@@ -8,7 +8,6 @@ Filename: segc.py
 Relative Path: main/segc/segc.py
 """
 
-
 from math import floor, sqrt, pi
 from qiskit import QuantumCircuit, transpile
 from qiskit_aer import AerSimulator
@@ -25,24 +24,28 @@ from segc.grover import diffuser, diffuser_subspace
 class SEGCSearcher:
     """Subspace-Enhanced Grover with Classical feedback (SEGC)"""
 
-    def __init__(self, n_qubits=6, k_coarse=3, shots=1024, max_iterations=4, decay_rate=0.8):
+    def __init__(self, n_qubits=6, k_coarse=3, shots=1024, max_iterations=4, decay_rate=0.8, noise_level=0.05):
         self.n_qubits = n_qubits
         self.k_coarse = k_coarse
         self.shots = shots
         self.max_iterations = max_iterations
         self.decay_rate = decay_rate
+        self.noise_level = noise_level
         self.simulator = AerSimulator()
         self.search_history = []
         self.subspace_scores = defaultdict(int)
         self.last_success_rates = []
+        self.subspace_evaluations = 0
+        self.selected_features = None
 
     def analyze_subspace_distribution(self, counts, target_bits):
-        """Analyze subspace distribution based on measurement results."""
+        """Analyze subspace distribution based on measurement results with noise."""
         subspace_counts = defaultdict(int)
         target_subspace = target_bits[-self.k_coarse:]
         for bitstring, count in counts.items():
             subspace = bitstring[-self.k_coarse:]
             subspace_counts[subspace] += count
+            self.subspace_evaluations += 1
 
         total_shots = sum(counts.values())
         subspace_scores = {}
@@ -50,6 +53,9 @@ class SEGCSearcher:
             probability = count / total_shots
             expected_uniform = 1 / (2**self.k_coarse)
             score = probability / expected_uniform
+            # Inject Gaussian noise
+            noise = np.random.normal(0, self.noise_level, 1)[0]
+            score = max(0.0, score + noise)
             subspace_scores[subspace] = score
             if subspace == target_subspace:
                 score *= 1.5
@@ -149,6 +155,15 @@ class SEGCSearcher:
             if success_rate > best_success_rate:
                 best_success_rate = success_rate
                 best_result = iteration_data
+                # Store feature indices derived from the full target bitstring
+                bitstring = format(target_num, f"0{self.n_qubits}b")
+                feature_indices = []
+                for i in range(0, len(bitstring), 3):
+                    chunk = bitstring[i:i+3]
+                    if len(chunk) == 3:
+                        feature_indices.append(int(chunk, 2))
+                # Limit to top_k=2 features
+                self.selected_features = feature_indices[:2]
 
             if success_rate >= 0.89:
                 print("High success rate achieved! Stopping early.")
@@ -215,6 +230,9 @@ Target: {target_num} ({target_bits})
 Total Iterations: {len(search_history)}
 Best Success Rate: {best_result['success_rate']:.3f}
 Best Iteration: {best_result['iteration']}
+Subspace Evaluations: {self.subspace_evaluations}
+Noise Level: {self.noise_level:.3f}
+Selected Features: {self.selected_features}
 Final Subspace Scores:
 """
         for subspace, score in sorted(self.subspace_scores.items(), key=lambda x: -x[1])[:5]:
@@ -240,6 +258,8 @@ def run_segc_demo():
         print(f"\n--- Final Results for Target {target} ---")
         print(f"Best success rate: {best_result['success_rate']:.3f}")
         print(f"Achieved in iteration: {best_result['iteration']}")
+        print(f"Subspace evaluations: {searcher.subspace_evaluations}")
+        print(f"Selected features: {searcher.selected_features}")
         searcher.plot_results(target, best_result, search_history)
 
 
