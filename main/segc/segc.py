@@ -8,17 +8,31 @@ Filename: segc.py
 Relative Path: main/segc/segc.py
 """
 
+from collections import Counter
+from qiskit import transpile
 from math import floor, sqrt, pi
 from qiskit import QuantumCircuit, transpile
 from qiskit_aer import AerSimulator
 from qiskit.visualization import plot_histogram
 import matplotlib.pyplot as plt
 import numpy as np
-from collections import defaultdict
-
+from collections import defaultdict, deque
 # Import modular components
-from segc.oracle import coarse_oracle, fine_oracle_subspace, diffuser, diffuser_subspace, weighted_coarse_oracle
+from segc.oracle import diffuser_grover, weighted_oracle, coarse_oracle, fine_oracle_subspace, diffuser, diffuser_subspace, weighted_coarse_oracle
 
+TOL_IMPROVEMENT = 0.01
+PATIENCE = 3
+SCORE_WINDOW = 5
+
+
+def run_and_measure(qc, shots=512):
+    """
+    Runs the quantum circuit and returns measured counts as a dict.
+    """
+    sim = AerSimulator()
+    qc_trans = transpile(qc, sim)
+    result = sim.run(qc_trans, shots=shots).result()
+    return result.get_counts(qc_trans)
 
 class SEGCSearcher:
     """Subspace-Enhanced Grover with Classical feedback (SEGC)"""
@@ -109,118 +123,63 @@ class SEGCSearcher:
         qc.measure(range(self.n_qubits), range(self.n_qubits))
         return qc
 
-    def search_with_feedback(self, target_num):
-        """Main SEGC search with classical feedback."""
-        target_bits = format(target_num, f"0{self.n_qubits}b")
-        print(f"SEGC Search for target: {target_num} = {target_bits}")
-        print(
-            f"Coarse on bottom {self.k_coarse} bits, fine on top {self.n_qubits - self.k_coarse} bits")
-        print("-" * 60)
+    def search_with_feedback(self, n_qubits, max_iters, evaluate_subspace_score, initial_target_bits, initial_k_coarse):
+        target_bits = initial_target_bits
+        k_coarse = initial_k_coarse
+        best_score = 0.0
+        best_bits = target_bits
+        subspace_scores = defaultdict(float)
+        recent_scores = deque(maxlen=SCORE_WINDOW)
+        stall_counter = 0
 
-        best_result = None
-        best_success_rate = 0.0
-        current_target_num = target_num
-        current_target_bits = target_bits
+        # initial oracle & grover circuit
+        oracle_circ = weighted_oracle([target_bits], n_qubits)
+        grover_circ = diffuser_grover(n_qubits, oracle_circ, k_coarse)
 
-        for iteration in range(self.max_iterations):
-            print(f"\n--- Iteration {iteration + 1} ---")
-            # Get top subspaces for weighted oracle
-            top_subspaces = sorted(
-                self.subspace_scores.items(), key=lambda x: x[1], reverse=True)[:3]
-            top_subspaces, weights = zip(
-                *top_subspaces) if top_subspaces else ([], [])
-            weights = [w / sum(weights) if sum(weights) > 0 else 1/len(weights)
-                       for w in weights] if weights else None
-            qc = self.build_adaptive_circuit(
-                current_target_bits, iteration, top_subspaces, weights)
-            result = self.simulator.run(
-                transpile(qc, self.simulator), shots=self.shots).result()
-            counts = result.get_counts()
-            target_count = counts.get(current_target_bits, 0)
-            success_rate = target_count / self.shots
-            self.last_success_rates.append(success_rate)
-            print(
-                f"Target found: {target_count}/{self.shots} ({success_rate:.3f})")
+        for iter in range(max_iters):
+            # simulate Grover circuit & measure
+            bitstrings = run_and_measure(grover_circ, shots=512)
+            iteration_scores = []
+            for candidate_bits, count in bitstrings.items():
+                score = evaluate_subspace_score(candidate_bits)
+                subspace_scores[candidate_bits] = score
+                iteration_scores.append(score)
+                recent_scores.append(score)
 
-            subspace_scores, subspace_counts = self.analyze_subspace_distribution(
-                counts, current_target_bits)
-            best_subspace = max(subspace_scores.keys(),
-                                key=lambda x: subspace_scores[x])
-            best_subspace_score = subspace_scores[best_subspace]
-            print(
-                f"Best subspace: {best_subspace} (score: {best_subspace_score:.2f})")
+                # Update best score & target_bits
+                if score > best_score + TOL_IMPROVEMENT:
+                    best_score = score
+                    best_bits = candidate_bits
+                    target_bits = best_bits
+                    stall_counter = 0
+                    # Update oracle and Grover circuit
+                    oracle_circ = weighted_oracle([best_bits], n_qubits)
+                    grover_circ = diffuser_grover(
+                        n_qubits, oracle_circ, k_coarse)
+                else:
+                    stall_counter += 1
 
-            for subspace in self.subspace_scores:
-                self.subspace_scores[subspace] *= self.decay_rate
-            for subspace, score in subspace_scores.items():
-                self.subspace_scores[subspace] += score
+            # Update search_history
+            self.search_history.append({
+                'iteration': iter + 1,
+                'success_rate': max(iteration_scores) if iteration_scores else 0.0,
+                'best_subspace_score': best_score,
+                'counts': bitstrings
+            })
 
-            # Dynamic k_coarse adjustment
-            if len(self.search_history) > 2 and max([h['best_subspace_score'] for h in self.search_history[-3:]]) < 1.0:
-                self.k_coarse = min(self.k_coarse + 1, self.n_qubits - 1)
-                print(
-                    f"Adjusted k_coarse to {self.k_coarse} due to low subspace scores")
+            # ⬇️ Dynamic k_coarse tuning
+            if stall_counter >= PATIENCE:
+                k_coarse = min(k_coarse + 1, n_qubits)
+                oracle_circ = weighted_oracle([best_bits], n_qubits)
+                grover_circ = diffuser_grover(n_qubits, oracle_circ, k_coarse)
+                stall_counter = 0
 
-            # Dynamic target_value update
-            if best_subspace_score > 2.0:
-                # Recompute target_value based on best subspace
-                new_feature_indices = []
-                for i in range(0, len(best_subspace) * 2, 3):  # Assuming 3 bits per feature
-                    chunk = best_subspace[i:i+3]
-                    if len(chunk) == 3:
-                        new_feature_indices.append(int(chunk, 2))
-                # Limit to top 2 features
-                new_feature_indices = new_feature_indices[:2]
-                new_bitstring = ''
-                for feat_idx in new_feature_indices:
-                    if len(new_bitstring) + 3 <= self.n_qubits:
-                        new_bitstring += format(feat_idx, '03b')
-                    else:
-                        remaining = self.n_qubits - len(new_bitstring)
-                        if remaining > 0:
-                            new_bitstring += format(feat_idx, f'0{remaining}b')
-                        break
-                new_bitstring = (new_bitstring + '0' *
-                                 self.n_qubits)[:self.n_qubits]
-                current_target_bits = new_bitstring
-                current_target_num = int(current_target_bits, 2)
-                print(
-                    f"Updated target to: {current_target_num} = {current_target_bits}")
+            if len(recent_scores) == SCORE_WINDOW and np.var(recent_scores) > 0.02:
+                k_coarse = max(1, k_coarse - 1)
+                oracle_circ = weighted_oracle([best_bits], n_qubits)
+                grover_circ = diffuser_grover(n_qubits, oracle_circ, k_coarse)
 
-            iteration_data = {
-                'iteration': iteration + 1,
-                'success_rate': success_rate,
-                'target_count': target_count,
-                'best_subspace': best_subspace,
-                'best_subspace_score': best_subspace_score,
-                'counts': counts.copy()
-            }
-            self.search_history.append(iteration_data)
-
-            if success_rate > best_success_rate:
-                best_success_rate = success_rate
-                best_result = iteration_data
-                # Store feature indices derived from the current target bitstring
-                bitstring = current_target_bits
-                feature_indices = []
-                for i in range(0, len(bitstring), 3):
-                    chunk = bitstring[i:i+3]
-                    if len(chunk) == 3:
-                        feature_indices.append(int(chunk, 2))
-                self.selected_features = feature_indices[:2]
-
-            if success_rate >= 0.89:
-                print("High success rate achieved! Stopping early.")
-                break
-            if len(self.last_success_rates) >= 3 and self.last_success_rates[-3] > self.last_success_rates[-2] > self.last_success_rates[-1]:
-                print("Warning: Over-amplification suspected. Reducing fine iterations.")
-                self.max_iterations = iteration + 1
-                break
-            if iteration > 2 and max([h['success_rate'] for h in self.search_history[-3:]]) - min([h['success_rate'] for h in self.search_history[-3:]]) < 0.01:
-                print("Convergence detected. Stopping.")
-                break
-
-        return best_result, self.search_history
+        return best_bits, best_score, subspace_scores
 
     def plot_results(self, target_num, best_result, search_history):
         """Visualize SEGC search results."""

@@ -1,13 +1,3 @@
-"""
-Created on 17/07/2025
-
-@author: Aryan
-
-Filename: oracle.py
-
-Relative Path: main/segc/oracle.py
-"""
-
 from qiskit import QuantumCircuit
 import numpy as np
 
@@ -58,14 +48,13 @@ def weighted_coarse_oracle(target_bits: str, k: int, top_subspaces: list, weight
     n = len(target_bits)
     qc = QuantumCircuit(n)
     if not top_subspaces or not weights:
-        # Fallback to standard coarse oracle
         return coarse_oracle(target_bits, k)
     for subspace, weight in zip(top_subspaces, weights):
         for i, bit in enumerate(reversed(subspace)):
             if bit == '0':
                 qc.x(i)
         if k == 1:
-            qc.rz(weight * np.pi, 0)  # Weighted phase shift
+            qc.rz(weight * np.pi, 0)
         else:
             qc.h(k - 1)
             qc.mcx(list(range(k - 1)), k - 1, weight=weight)
@@ -76,27 +65,32 @@ def weighted_coarse_oracle(target_bits: str, k: int, top_subspaces: list, weight
     return qc
 
 
-"""
-Created on 17/07/2025
-
-@author: Aryan
-
-Filename: grover.py
-
-Relative Path: main/segc/grover.py
-"""
-
-
-def diffuser(n):
-    """Standard Grover diffuser on n qubits."""
+def weighted_oracle(bitstrings, n):
+    """Oracle that flips the phase of all bitstrings in the list."""
     qc = QuantumCircuit(n)
-    qc.h(range(n))
-    qc.x(range(n))
-    qc.h(n - 1)
-    qc.mcx(list(range(n - 1)), n - 1)
-    qc.h(n - 1)
-    qc.x(range(n))
-    qc.h(range(n))
+    for bits in bitstrings:
+        for i, b in enumerate(reversed(bits)):
+            if b == '0':
+                qc.x(i)
+        qc.h(n - 1)
+        qc.mcx(list(range(n - 1)), n - 1)
+        qc.h(n - 1)
+        for i, b in enumerate(reversed(bits)):
+            if b == '0':
+                qc.x(i)
+    return qc
+
+
+def diffuser(n_qubits):
+    """Standard Grover diffuser on n qubits."""
+    qc = QuantumCircuit(n_qubits)
+    qc.h(range(n_qubits))
+    qc.x(range(n_qubits))
+    qc.h(n_qubits - 1)
+    qc.mcx(list(range(n_qubits - 1)), n_qubits - 1)
+    qc.h(n_qubits - 1)
+    qc.x(range(n_qubits))
+    qc.h(range(n_qubits))
     return qc
 
 
@@ -111,4 +105,18 @@ def diffuser_subspace(n: int, k: int) -> QuantumCircuit:
     qc.h(high[-1])
     qc.x(high)
     qc.h(high)
+    return qc
+
+
+def diffuser_grover(n_qubits, oracle_circuit, k):
+    """
+    Constructs a Grover circuit using the given oracle and diffuser.
+    Applies k iterations.
+    """
+    qc = QuantumCircuit(n_qubits)
+    qc.h(range(n_qubits))
+    for _ in range(k):
+        qc.append(oracle_circuit.to_gate(), range(n_qubits))
+        qc.append(diffuser(n_qubits).to_gate(), range(n_qubits))
+    qc.measure_all()
     return qc

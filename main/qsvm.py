@@ -29,20 +29,22 @@ class OptimizedSEGCSearcher(SEGCSearcher):
         self.convergence_threshold = convergence_threshold
         self.parameter_analysis = {}
 
-    def analyze_parameters(self, data_characteristics):
+    def analyze_parameters(self, data_characteristics, n_features):
         data_size = data_characteristics.get('size', 100)
         data_complexity = data_characteristics.get('complexity', 'medium')
 
+        # Constrain n_qubits to the number of features
+        # Use at most 5 qubits or number of features
+        optimal_qubits = min(n_features, 5)
         if data_size < 50:
-            optimal_qubits = 3
+            optimal_qubits = min(n_features, 3)
             optimal_k = 2
             optimal_shots = 128
         elif data_size < 200:
-            optimal_qubits = 4
+            optimal_qubits = min(n_features, 4)
             optimal_k = 2
             optimal_shots = 256
         else:
-            optimal_qubits = 5
             optimal_k = 3
             optimal_shots = 512
 
@@ -69,7 +71,6 @@ class OptimizedSEGCSearcher(SEGCSearcher):
         }
         return self.parameter_analysis
 
-
 class OptimizedQuantumSVMWithSEGC:
     def __init__(self, segc_params=None):
         if segc_params is None:
@@ -93,7 +94,8 @@ class OptimizedQuantumSVMWithSEGC:
         corrs = self.compute_feature_target_corr(X, y)
         ranked = np.argsort(-corrs)[:top_k]
 
-        max_bits = self.segc_searcher.n_qubits
+        max_bits = min(self.segc_searcher.n_qubits,
+                       X.shape[1])  # Respect feature count
         bitstring = ''
         for feat_idx in ranked:
             if len(bitstring) + 3 <= max_bits:
@@ -106,6 +108,7 @@ class OptimizedQuantumSVMWithSEGC:
 
         bitstring = (bitstring + '0' * max_bits)[:max_bits]
         return int(bitstring, 2), ranked
+
 
     def optimize_hyperparameters(self, X, y):
         best_C, best_score = 1.0, 0.0
@@ -124,6 +127,7 @@ class OptimizedQuantumSVMWithSEGC:
                 continue
         return best_C
 
+
     def fit(self, X, y, features, feature_mask=None):
         start_time = time.time()
         self.y_train = y
@@ -139,7 +143,7 @@ class OptimizedQuantumSVMWithSEGC:
                 'complexity': 'high' if X.shape[1] > 4 else 'medium'
             }
             params = self.segc_searcher.analyze_parameters(
-                data_characteristics)
+                data_characteristics, n_features=X.shape[1])  # Pass n_features
             print(f"SEGC Parameter Analysis: {params}")
 
             X_train, X_val, y_train, y_val = train_test_split(
@@ -148,14 +152,40 @@ class OptimizedQuantumSVMWithSEGC:
                 X_train, y_train, top_k=params['recommended_k_coarse'])
             self.feature_indices = feature_indices
 
-            # Updated: only pass target_value as expected by simplified SEGCSearcher
-            best_result, search_history = self.segc_searcher.search_with_feedback(
-                target_value)
+            def evaluate_subspace_score(bitstring):
+                selected_indices = [
+                    i for i, bit in enumerate(bitstring) if bit == '1']
+                if len(selected_indices) == 0:
+                    return 0
+                # Ensure indices are within bounds
+                selected_indices = [
+                    i for i in selected_indices if i < X_train.shape[1]]
+                if len(selected_indices) == 0:
+                    return 0
+                X_sub = X_train[:, selected_indices]
+                X_val_sub = X_val[:, selected_indices]
+                try:
+                    train_kernel = compute_simplified_kernel(X_sub)
+                    val_kernel = compute_simplified_kernel(X_val_sub, X_sub)
+                    clf = SVC(kernel='precomputed', C=1.0)
+                    clf.fit(train_kernel, y_train)
+                    return clf.score(val_kernel, y_val)
+                except:
+                    return 0
 
+            best_bits, best_score, subspace_scores = self.segc_searcher.search_with_feedback(
+                self.segc_searcher.n_qubits,
+                self.segc_searcher.max_iterations,
+                evaluate_subspace_score,
+                format(target_value, f'0{self.segc_searcher.n_qubits}b'),
+                self.segc_searcher.k_coarse
+            )
+
+            # Initialize segc_stats with search results
             self.segc_stats = {
                 'parameter_analysis': params,
-                'search_history': search_history,
-                'subspace_scores': dict(self.segc_searcher.subspace_scores),
+                'search_history': self.segc_searcher.search_history,
+                'subspace_scores': dict(subspace_scores),
                 'selected_features': [features[i] for i in feature_indices]
             }
 
