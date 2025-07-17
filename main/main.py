@@ -12,12 +12,12 @@ from qsvm import OptimizedQuantumSVMWithSEGC
 from data_utils import load_financial_data
 
 
-def main():
+def main(ticker="GOOGL"):
     print("SEGC Enhanced QSVM with Dynamic Feature Oracle")
     print("="*60)
 
     (X_train, X_test, y_train, y_test), features = load_financial_data(
-        csv_path="ticker/GOOGL/GOOGL_data.csv")
+        csv_path=f"ticker/{ticker}/{ticker}_data.csv")
     print(f"Training samples: {len(X_train)}, Test samples: {len(X_test)}")
 
     qsvm = OptimizedQuantumSVMWithSEGC()
@@ -39,4 +39,4 @@ def main():
 
 
 if __name__ == "__main__":
-    main()
+    main(ticker="AMZN")  # Change ticker as needed

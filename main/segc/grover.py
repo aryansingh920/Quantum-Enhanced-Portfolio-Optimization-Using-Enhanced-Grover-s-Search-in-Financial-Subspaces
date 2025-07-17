@@ -1,14 +1,13 @@
 """
-Grover module for SEGC (Subspace-Enhanced Grover with Classical feedback)
-
 Created on 17/07/2025
 
 @author: Aryan
 
 Filename: grover.py
 
-Relative Path: dynamic-oseq-qsvm/grover.py
+Relative Path: main/segc/grover.py
 """
+
 
 from qiskit import QuantumCircuit
 

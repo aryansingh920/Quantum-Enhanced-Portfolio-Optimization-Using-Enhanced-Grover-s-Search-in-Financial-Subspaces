@@ -5,8 +5,9 @@ Created on 17/07/2025
 
 Filename: segc.py
 
-Relative Path: dynamic-oseq-qsvm/segc.py
+Relative Path: main/segc/segc.py
 """
+
 
 from math import floor, sqrt, pi
 from qiskit import QuantumCircuit, transpile

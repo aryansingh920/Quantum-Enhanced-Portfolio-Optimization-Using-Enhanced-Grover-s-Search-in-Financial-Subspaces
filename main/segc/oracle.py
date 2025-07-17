@@ -1,14 +1,13 @@
 """
-Oracle module for SEGC (Subspace-Enhanced Grover with Classical feedback)
-
 Created on 17/07/2025
 
 @author: Aryan
 
 Filename: oracle.py
 
-Relative Path: dynamic-oseq-qsvm/oracle.py
+Relative Path: main/segc/oracle.py
 """
+
 
 from qiskit import QuantumCircuit
 
