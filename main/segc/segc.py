@@ -17,8 +17,7 @@ import numpy as np
 from collections import defaultdict
 
 # Import modular components
-from segc.oracle import coarse_oracle, fine_oracle_subspace
-from segc.grover import diffuser, diffuser_subspace
+from segc.oracle import coarse_oracle, fine_oracle_subspace, diffuser, diffuser_subspace, weighted_coarse_oracle
 
 
 class SEGCSearcher:
@@ -37,6 +36,7 @@ class SEGCSearcher:
         self.last_success_rates = []
         self.subspace_evaluations = 0
         self.selected_features = None
+        self.n_features = 4  # Number of features (adjust based on input data)
 
     def analyze_subspace_distribution(self, counts, target_bits):
         """Analyze subspace distribution based on measurement results with noise."""
@@ -53,7 +53,6 @@ class SEGCSearcher:
             probability = count / total_shots
             expected_uniform = 1 / (2**self.k_coarse)
             score = probability / expected_uniform
-            # Inject Gaussian noise
             noise = np.random.normal(0, self.noise_level, 1)[0]
             score = max(0.0, score + noise)
             subspace_scores[subspace] = score
@@ -82,15 +81,19 @@ class SEGCSearcher:
                 base_iterations += 2
         return base_iterations
 
-    def build_adaptive_circuit(self, target_bits, iteration_num=0):
+    def build_adaptive_circuit(self, target_bits, iteration_num=0, top_subspaces=None, weights=None):
         """Build SEGC circuit with adaptive parameters."""
         qc = QuantumCircuit(self.n_qubits, self.n_qubits)
         qc.h(range(self.n_qubits))
         r1 = self.adaptive_iteration_count("coarse")
         print(f"Iteration {iteration_num + 1}: Coarse iterations: {r1}")
         for _ in range(r1):
-            qc.append(coarse_oracle(target_bits, self.k_coarse),
-                      range(self.n_qubits))
+            if top_subspaces and weights:
+                qc.append(weighted_coarse_oracle(
+                    target_bits, self.k_coarse, top_subspaces, weights), range(self.n_qubits))
+            else:
+                qc.append(coarse_oracle(target_bits, self.k_coarse),
+                          range(self.n_qubits))
             qc.append(diffuser(self.n_qubits), range(self.n_qubits))
         qc.barrier()
         target_subspace = target_bits[-self.k_coarse:]
@@ -116,21 +119,31 @@ class SEGCSearcher:
 
         best_result = None
         best_success_rate = 0.0
+        current_target_num = target_num
+        current_target_bits = target_bits
 
         for iteration in range(self.max_iterations):
             print(f"\n--- Iteration {iteration + 1} ---")
-            qc = self.build_adaptive_circuit(target_bits, iteration)
+            # Get top subspaces for weighted oracle
+            top_subspaces = sorted(
+                self.subspace_scores.items(), key=lambda x: x[1], reverse=True)[:3]
+            top_subspaces, weights = zip(
+                *top_subspaces) if top_subspaces else ([], [])
+            weights = [w / sum(weights) if sum(weights) > 0 else 1/len(weights)
+                       for w in weights] if weights else None
+            qc = self.build_adaptive_circuit(
+                current_target_bits, iteration, top_subspaces, weights)
             result = self.simulator.run(
                 transpile(qc, self.simulator), shots=self.shots).result()
             counts = result.get_counts()
-            target_count = counts.get(target_bits, 0)
+            target_count = counts.get(current_target_bits, 0)
             success_rate = target_count / self.shots
             self.last_success_rates.append(success_rate)
             print(
                 f"Target found: {target_count}/{self.shots} ({success_rate:.3f})")
 
             subspace_scores, subspace_counts = self.analyze_subspace_distribution(
-                counts, target_bits)
+                counts, current_target_bits)
             best_subspace = max(subspace_scores.keys(),
                                 key=lambda x: subspace_scores[x])
             best_subspace_score = subspace_scores[best_subspace]
@@ -141,6 +154,38 @@ class SEGCSearcher:
                 self.subspace_scores[subspace] *= self.decay_rate
             for subspace, score in subspace_scores.items():
                 self.subspace_scores[subspace] += score
+
+            # Dynamic k_coarse adjustment
+            if len(self.search_history) > 2 and max([h['best_subspace_score'] for h in self.search_history[-3:]]) < 1.0:
+                self.k_coarse = min(self.k_coarse + 1, self.n_qubits - 1)
+                print(
+                    f"Adjusted k_coarse to {self.k_coarse} due to low subspace scores")
+
+            # Dynamic target_value update
+            if best_subspace_score > 2.0:
+                # Recompute target_value based on best subspace
+                new_feature_indices = []
+                for i in range(0, len(best_subspace) * 2, 3):  # Assuming 3 bits per feature
+                    chunk = best_subspace[i:i+3]
+                    if len(chunk) == 3:
+                        new_feature_indices.append(int(chunk, 2))
+                # Limit to top 2 features
+                new_feature_indices = new_feature_indices[:2]
+                new_bitstring = ''
+                for feat_idx in new_feature_indices:
+                    if len(new_bitstring) + 3 <= self.n_qubits:
+                        new_bitstring += format(feat_idx, '03b')
+                    else:
+                        remaining = self.n_qubits - len(new_bitstring)
+                        if remaining > 0:
+                            new_bitstring += format(feat_idx, f'0{remaining}b')
+                        break
+                new_bitstring = (new_bitstring + '0' *
+                                 self.n_qubits)[:self.n_qubits]
+                current_target_bits = new_bitstring
+                current_target_num = int(current_target_bits, 2)
+                print(
+                    f"Updated target to: {current_target_num} = {current_target_bits}")
 
             iteration_data = {
                 'iteration': iteration + 1,
@@ -155,14 +200,13 @@ class SEGCSearcher:
             if success_rate > best_success_rate:
                 best_success_rate = success_rate
                 best_result = iteration_data
-                # Store feature indices derived from the full target bitstring
-                bitstring = format(target_num, f"0{self.n_qubits}b")
+                # Store feature indices derived from the current target bitstring
+                bitstring = current_target_bits
                 feature_indices = []
                 for i in range(0, len(bitstring), 3):
                     chunk = bitstring[i:i+3]
                     if len(chunk) == 3:
                         feature_indices.append(int(chunk, 2))
-                # Limit to top_k=2 features
                 self.selected_features = feature_indices[:2]
 
             if success_rate >= 0.89:
@@ -225,12 +269,14 @@ class SEGCSearcher:
             ax3.legend()
 
         ax4.axis('off')
+        total_subspaces = 2 ** self.n_features
         summary_text = f"""SEGC Search Summary
 Target: {target_num} ({target_bits})
 Total Iterations: {len(search_history)}
 Best Success Rate: {best_result['success_rate']:.3f}
 Best Iteration: {best_result['iteration']}
 Subspace Evaluations: {self.subspace_evaluations}
+Fraction of Subspaces Evaluated: {self.subspace_evaluations / total_subspaces:.3f}
 Noise Level: {self.noise_level:.3f}
 Selected Features: {self.selected_features}
 Final Subspace Scores:
@@ -244,24 +290,3 @@ Final Subspace Scores:
         plt.suptitle(
             f'SEGC Analysis for Target {target_num}', fontsize=16, y=0.98)
         plt.show()
-
-
-def run_segc_demo():
-    """Run SEGC demonstration."""
-    targets = [117]
-    for target in targets:
-        print(f"\n{'='*80}")
-        print(f"SEGC DEMO: Target {target}")
-        print(f"{'='*80}")
-        searcher = SEGCSearcher()
-        best_result, search_history = searcher.search_with_feedback(target)
-        print(f"\n--- Final Results for Target {target} ---")
-        print(f"Best success rate: {best_result['success_rate']:.3f}")
-        print(f"Achieved in iteration: {best_result['iteration']}")
-        print(f"Subspace evaluations: {searcher.subspace_evaluations}")
-        print(f"Selected features: {searcher.selected_features}")
-        searcher.plot_results(target, best_result, search_history)
-
-
-if __name__ == "__main__":
-    run_segc_demo()
