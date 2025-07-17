@@ -16,7 +16,7 @@ from sklearn.model_selection import train_test_split
 from sklearn.metrics import accuracy_score
 
 # --- SEGC primitives ---
-from segc import diffuser, coarse_oracle, fine_oracle_subspace, diffuser_subspace, SEGCSearcher
+from segc.segc import diffuser, coarse_oracle, fine_oracle_subspace, diffuser_subspace, SEGCSearcher
 
 # --- Kernel ---
 from kernel_utils import compute_simplified_kernel

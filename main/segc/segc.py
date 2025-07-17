@@ -16,73 +16,9 @@ import matplotlib.pyplot as plt
 import numpy as np
 from collections import defaultdict
 
-
-def diffuser(n):
-    """Standard Grover diffuser on n qubits."""
-    qc = QuantumCircuit(n)
-    qc.h(range(n))
-    qc.x(range(n))
-    qc.h(n - 1)
-    qc.mcx(list(range(n - 1)), n - 1)
-    qc.h(n - 1)
-    qc.x(range(n))
-    qc.h(range(n))
-    return qc
-
-
-def coarse_oracle(target_bits: str, k: int) -> QuantumCircuit:
-    """Marks states whose bottom-k bits match the target's bottom-k bits."""
-    n = len(target_bits)
-    qc = QuantumCircuit(n)
-    bottom_k = target_bits[-k:]
-    for i, bit in enumerate(reversed(bottom_k)):
-        if bit == '0':
-            qc.x(i)
-    if k == 1:
-        qc.z(0)
-    else:
-        qc.h(k - 1)
-        qc.mcx(list(range(k - 1)), k - 1)
-        qc.h(k - 1)
-    for i, bit in enumerate(reversed(bottom_k)):
-        if bit == '0':
-            qc.x(i)
-    return qc
-
-
-def fine_oracle_subspace(target_bits: str, k: int) -> QuantumCircuit:
-    """Phase-flips the exact target state within the high (n-k) qubits."""
-    n = len(target_bits)
-    qc = QuantumCircuit(n)
-    high_bits = target_bits[:-k]
-    m = len(high_bits)
-    for idx, bit in enumerate(reversed(high_bits)):
-        if bit == '0':
-            qc.x(k + idx)
-    if m == 1:
-        qc.z(k)
-    else:
-        qc.h(k + m - 1)
-        qc.mcx(list(range(k, k + m - 1)), k + m - 1)
-        qc.h(k + m - 1)
-    for idx, bit in enumerate(reversed(high_bits)):
-        if bit == '0':
-            qc.x(k + idx)
-    return qc
-
-
-def diffuser_subspace(n: int, k: int) -> QuantumCircuit:
-    """Inversion about mean on the high (n-k) qubits."""
-    qc = QuantumCircuit(n)
-    high = list(range(k, n))
-    qc.h(high)
-    qc.x(high)
-    qc.h(high[-1])
-    qc.mcx(high[:-1], high[-1])
-    qc.h(high[-1])
-    qc.x(high)
-    qc.h(high)
-    return qc
+# Import modular components
+from segc.oracle import coarse_oracle, fine_oracle_subspace
+from segc.grover import diffuser, diffuser_subspace
 
 
 class SEGCSearcher:
@@ -304,3 +240,7 @@ def run_segc_demo():
         print(f"Best success rate: {best_result['success_rate']:.3f}")
         print(f"Achieved in iteration: {best_result['iteration']}")
         searcher.plot_results(target, best_result, search_history)
+
+
+if __name__ == "__main__":
+    run_segc_demo()
