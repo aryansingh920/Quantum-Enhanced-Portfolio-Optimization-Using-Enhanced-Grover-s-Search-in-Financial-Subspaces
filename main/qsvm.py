@@ -181,6 +181,8 @@ class OptimizedQuantumSVMWithSEGC:
                 self.segc_searcher.k_coarse
             )
 
+            SEGCSearcher.plot_subspace_scores(subspace_scores)
+
             # Initialize segc_stats with search results
             self.segc_stats = {
                 'parameter_analysis': params,

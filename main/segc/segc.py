@@ -7,7 +7,7 @@ Filename: segc.py
 
 Relative Path: main/segc/segc.py
 """
-
+import matplotlib.pyplot as plt
 from collections import Counter
 from qiskit import transpile
 from math import floor, sqrt, pi
@@ -121,7 +121,31 @@ class SEGCSearcher:
             qc.append(diffuser_subspace(self.n_qubits,
                       self.k_coarse), range(self.n_qubits))
         qc.measure(range(self.n_qubits), range(self.n_qubits))
+        print("Final Circuit:")
+        print(qc.draw('mpl'))  # Display the circuit
         return qc
+
+    def plot_subspace_scores(subspace_scores, marked_threshold=0.9):
+        bitstrings = list(subspace_scores.keys())
+        scores = list(subspace_scores.values())
+
+        # Normalize scores to [0, 1] for threshold marking
+        max_score = max(scores)
+        normalized_scores = [s / max_score for s in scores]
+
+        colors = ['green' if score >=
+                  marked_threshold else 'gray' for score in normalized_scores]
+
+        plt.figure(figsize=(12, 6))
+        bars = plt.bar(bitstrings, scores, color=colors)
+
+        plt.xlabel("Bitstring (Feature Subspace)")
+        plt.ylabel("QSVM Validation Score")
+        plt.title("Subspace Scores After SEGC Search")
+        plt.xticks(rotation=90)
+        plt.tight_layout()
+        plt.show()
+
 
     def search_with_feedback(self, n_qubits, max_iters, evaluate_subspace_score, initial_target_bits, initial_k_coarse):
         target_bits = initial_target_bits

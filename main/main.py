@@ -175,4 +175,4 @@ def main(ticker="GOOGL"):
 
 
 if __name__ == "__main__":
-    main(ticker="AMZN")  # Change ticker as needed
+    main(ticker="JPM")  # Change ticker as needed

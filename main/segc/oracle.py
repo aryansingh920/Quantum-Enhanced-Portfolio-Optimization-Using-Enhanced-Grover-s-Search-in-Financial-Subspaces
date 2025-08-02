@@ -19,6 +19,8 @@ def coarse_oracle(target_bits: str, k: int) -> QuantumCircuit:
     for i, bit in enumerate(reversed(bottom_k)):
         if bit == '0':
             qc.x(i)
+    qc.draw('mpl').show()  # Display the circuit
+    # mpl.show()  # Show the matplotlib figure
     return qc
 
 
