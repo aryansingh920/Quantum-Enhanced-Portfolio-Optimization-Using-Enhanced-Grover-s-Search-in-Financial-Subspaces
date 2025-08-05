@@ -11,3 +11,4 @@ scikit-optimize
 pylatexenc
 yfinance
 alpha_vantage
+cirq

@@ -25,16 +25,26 @@ class SEGCAlgorithm:
         print(
             f"Expected coarse subspace prob: {np.sin((2 * self.coarse_iterations + 1) * self.theta_coarse)**2:.4f}")
 
+
     def coarse_oracle(self, qc, qubits, ancilla):
-        for i in range(4):
-            qc.x(qubits[i])
-        qc.h(qubits[4])
-        # Use q4 as target for phase flip
-        qc.mcx(qubits[0:4], qubits[4], mode='noancilla')
-        qc.h(qubits[4])
-        for i in range(4):
-            qc.x(qubits[i])
-        print("Debug: Coarse oracle applied")
+        # Mark all states with first 4 data qubits == 0 (q0..q3 == 0)
+        # 1) Map 0→1 on the first 4 controls so "all zeros" becomes "all ones"
+        qc.x(qubits[0:4])
+
+        # 2) Compute predicate (q0=q1=q2=q3=1) into ancilla
+        qc.mcx(qubits[0:4], ancilla[0], mode='noancilla')
+
+        # 3) Phase-kickback: flip phase iff ancilla==1
+        qc.z(ancilla[0])
+
+        # 4) Uncompute predicate; restore ancilla to |0>
+        qc.mcx(qubits[0:4], ancilla[0], mode='noancilla')
+
+        # 5) Undo the initial X
+        qc.x(qubits[0:4])
+
+        print("Debug: Coarse oracle (phase-kickback) applied for 0000****")
+
 
     def coarse_diffuser(self, qc, qubits):
         qc.h(qubits)
@@ -130,20 +140,36 @@ class SEGCAlgorithm:
         qc.measure(qr, cr)
         return qc, final_state
 
+
     def analyze_state(self, state, step_name):
         print(f"{step_name}:")
-        target_idx = int(self.target, 2)
-        target_amp = state.data[target_idx]
+
+        # compute total probability of target across both ancilla branches
+        target_idx_anc0 = int('0' + self.target, 2)
+        target_idx_anc1 = int('1' + self.target, 2)
+        target_prob = (abs(state.data[target_idx_anc0])**2
+                       + abs(state.data[target_idx_anc1])**2)
+
         print(
-            f"  Target {self.target} (Qiskit) / {self.target_standard} (Standard): {target_amp:.4f} (prob: {abs(target_amp)**2:.4f})")
-        coarse_prob = sum(abs(state.data[i])**2 for i in range(8))
+            f"  Target {self.target} (Qiskit) / {self.target_standard} (Standard): prob: {target_prob:.4f}")
+
+        # compute total probability of coarse subspace across both ancilla branches
+        coarse_prob = 0
+        for i in range(8):  # 0000**** pattern
+            state_str = format(i, '07b')
+            for anc in ['0', '1']:
+                idx = int(anc + state_str, 2)
+                coarse_prob += abs(state.data[idx])**2
         print(f"  Coarse subspace prob: {coarse_prob:.4f}")
-        print("  Coarse-valid states (Qiskit ordering):")
+
+        print("  Coarse-valid states (Qiskit ordering, ancilla traced out):")
         for i in range(8):
             state_str = format(i, '07b')
-            amp = state.data[i]
+            prob = sum(abs(state.data[int(anc + state_str, 2)])
+                       ** 2 for anc in ['0', '1'])
             mark = '← TARGET' if state_str == self.target else ''
-            print(f"    {state_str}: {amp:.4f} (prob: {abs(amp)**2:.4f}) {mark}")
+            print(f"    {state_str}: prob: {prob:.4f} {mark}")
+
 
     def run_simulation(self, qc, final_state):
         simulator = StatevectorSimulator()
@@ -154,22 +180,35 @@ class SEGCAlgorithm:
         print("FINAL RESULTS")
         print("==================================================")
         total_shots = sum(counts.values())
+
+        # match Standard target
         target_prob = counts.get(self.target_standard, 0) / total_shots
-        coarse_prob = sum(counts.get(
-            format(i, '07b')[::-1], 0) / total_shots for i in range(8))
+
+        # coarse subspace probability: sum over all measured states where q0..3=0000
+        coarse_prob = sum(prob for bitstring, prob in (
+            (state[::-1], count/total_shots) for state, count in counts.items())
+            if bitstring.startswith("0000"))
+
+        # trace-out-based theoretical probability
+        target_idx_anc0 = int('0' + self.target, 2)
+        target_idx_anc1 = int('1' + self.target, 2)
+        theoretical_target_prob = (abs(final_state.data[target_idx_anc0])**2
+                                   + abs(final_state.data[target_idx_anc1])**2)
+
         print(
             f"Target state probability (Standard {self.target_standard}): {target_prob:.4f}")
         print(f"Coarse subspace probability: {coarse_prob:.4f}")
         print(
-            f"Theoretical target prob: {abs(final_state.data[int(self.target, 2)])**2:.4f}")
+            f"Theoretical target prob (traced ancilla): {theoretical_target_prob:.4f}")
+
         print("Top 10 measured states (Standard ordering):")
         sorted_counts = sorted(
             counts.items(), key=lambda x: x[1], reverse=True)[:10]
         for state, count in sorted_counts:
             prob = count / total_shots
             state_standard = state[::-1]
-            coarse_valid = 'coarse-valid' if int(
-                state_standard, 2) < 8 else 'coarse-invalid'
+            coarse_valid = 'coarse-valid' if state_standard.startswith(
+                "0000") else 'coarse-invalid'
             mark = '← TARGET' if state == self.target_standard else ''
             print(f"  {state_standard}: {prob:.4f} [{coarse_valid}] {mark}")
 
