@@ -71,10 +71,16 @@ class SEGCAlgorithm:
         print("Debug: Fine oracle applied")
 
     def partial_diffuser(self, qc, qubits, ancilla):
-        for i in range(4):
-            qc.x(qubits[i])
-        qc.mcx(qubits[0:4], ancilla[0], mode='noancilla')
+        # Apply diffuser only to fine qubits (4, 5, 6) conditioned on coarse qubits (0–3)
+        coarse_qubits = qubits[0:4]
         fine_qubits = qubits[4:7]
+
+        # Ensure coarse qubits are in |0000> for diffusion
+        for i in range(4):
+            qc.x(coarse_qubits[i])
+        qc.mcx(coarse_qubits, ancilla[0], mode='noancilla')
+
+        # Standard Grover diffuser for fine qubits
         qc.h(fine_qubits)
         qc.x(fine_qubits)
         qc.h(fine_qubits[-1])
@@ -82,10 +88,16 @@ class SEGCAlgorithm:
         qc.h(fine_qubits[-1])
         qc.x(fine_qubits)
         qc.h(fine_qubits)
-        qc.mcx(qubits[0:4], ancilla[0], mode='noancilla')
+
+        # Undo coarse control
+        qc.mcx(coarse_qubits, ancilla[0], mode='noancilla')
         for i in range(4):
-            qc.x(qubits[i])
-        print("Debug: Partial diffuser applied")
+            qc.x(coarse_qubits[i])
+
+        print("Debug: Enhanced partial diffuser applied")
+
+
+
 
     def debug_oracle(self, oracle_type='coarse'):
         qr = QuantumRegister(self.n, 'q')
@@ -140,22 +152,17 @@ class SEGCAlgorithm:
         qc.measure(qr, cr)
         return qc, final_state
 
-
     def analyze_state(self, state, step_name):
         print(f"{step_name}:")
-
-        # compute total probability of target across both ancilla branches
         target_idx_anc0 = int('0' + self.target, 2)
         target_idx_anc1 = int('1' + self.target, 2)
-        target_prob = (abs(state.data[target_idx_anc0])**2
-                       + abs(state.data[target_idx_anc1])**2)
-
+        target_prob = (abs(state.data[target_idx_anc0])
+                       ** 2 + abs(state.data[target_idx_anc1])**2)
         print(
             f"  Target {self.target} (Qiskit) / {self.target_standard} (Standard): prob: {target_prob:.4f}")
 
-        # compute total probability of coarse subspace across both ancilla branches
         coarse_prob = 0
-        for i in range(8):  # 0000**** pattern
+        for i in range(8):
             state_str = format(i, '07b')
             for anc in ['0', '1']:
                 idx = int(anc + state_str, 2)
@@ -170,6 +177,7 @@ class SEGCAlgorithm:
             mark = '← TARGET' if state_str == self.target else ''
             print(f"    {state_str}: prob: {prob:.4f} {mark}")
 
+        return target_prob  # Return the computed target probability
 
     def run_simulation(self, qc, final_state):
         simulator = StatevectorSimulator()

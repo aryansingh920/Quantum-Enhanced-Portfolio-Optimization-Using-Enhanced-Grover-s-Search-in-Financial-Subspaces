@@ -1,0 +1,39 @@
+2025-08-07 22:55:08,401 - INFO - Target state: 1010000 (Standard), 0000101 (Qiskit)
+2025-08-07 22:55:08,402 - ERROR - CSV file ticker/JPM/JPM_data.csv not found
+2025-08-07 22:56:01,346 - INFO - Target state: 1010000 (Standard), 0000101 (Qiskit)
+2025-08-07 22:56:01,361 - INFO - Training QSVM...
+2025-08-07 22:57:45,670 - INFO - Initialized superposition
+2025-08-07 22:57:45,670 - INFO - Executing coarse iterations...
+2025-08-07 22:57:45,670 - INFO - Coarse iteration 1/4
+2025-08-07 22:57:45,680 - INFO - Coarse iteration 1 target probability: 0.0044
+2025-08-07 22:57:45,680 - INFO - Coarse iteration 2/4
+2025-08-07 22:57:45,698 - INFO - Coarse iteration 2 target probability: 0.0008
+2025-08-07 22:57:45,698 - INFO - Coarse iteration 3/4
+2025-08-07 22:57:45,725 - INFO - Coarse iteration 3 target probability: 0.0003
+2025-08-07 22:57:45,725 - INFO - Coarse iteration 4/4
+2025-08-07 22:57:45,761 - INFO - Coarse iteration 4 target probability: 0.0035
+2025-08-07 22:57:45,761 - INFO - Feature mapping:
+2025-08-07 22:57:45,761 - INFO -   State 0000000: [-0.48313294 -0.4747683  -0.4765032  -0.46824707]
+2025-08-07 22:57:45,762 - INFO -   State 0000001: [-0.57342955 -0.57774222 -0.56951726 -0.57179462]
+2025-08-07 22:57:45,762 - INFO -   State 0000010: [-0.79290665 -0.79733898 -0.79061973 -0.79498462]
+2025-08-07 22:57:45,762 - INFO -   State 0000011: [-0.47515094 -0.48210609 -0.47771877 -0.48011706]
+2025-08-07 22:57:45,762 - INFO -   State 0000100: [-0.18440782 -0.18156075 -0.17614644 -0.17313211]
+2025-08-07 22:57:45,762 - INFO -   State 0000101: [0.95817135 0.9666248  0.97017261 0.97151226]
+2025-08-07 22:57:45,762 - INFO -   State 0000110: [-0.67051081 -0.67357161 -0.6728952  -0.67155705]
+2025-08-07 22:57:45,762 - INFO -   State 0000111: [-0.62549748 -0.63035591 -0.62643203 -0.62873678]
+2025-08-07 22:57:45,762 - INFO - Mapped 8 states to coarse subspace with features
+2025-08-07 22:57:45,762 - INFO - Executing QSVM feedback loop...
+2025-08-07 22:57:45,762 - INFO - Feedback iteration 1/5
+2025-08-07 22:58:07,428 - INFO - Target probability: 0.0035, Threshold: 0.4483
+2025-08-07 22:58:07,428 - INFO - Feedback iteration 2/5
+2025-08-07 22:58:29,456 - INFO - Target probability: 0.0035, Threshold: 0.8263
+2025-08-07 22:58:29,456 - WARNING - No improvement, forcing target state marking
+2025-08-07 22:58:29,456 - INFO - Feedback iteration 3/5
+2025-08-07 22:58:52,685 - INFO - Target probability: 0.0035, Threshold: 0.8483
+2025-08-07 22:58:52,685 - WARNING - No improvement, forcing target state marking
+2025-08-07 22:58:52,686 - INFO - Feedback iteration 4/5
+2025-08-07 22:59:16,702 - INFO - Target probability: 0.0035, Threshold: 0.8483
+2025-08-07 22:59:16,702 - WARNING - No improvement, forcing target state marking
+2025-08-07 22:59:16,703 - INFO - Feedback iteration 5/5
+2025-08-07 22:59:41,407 - INFO - Target probability: 0.0035, Threshold: 0.8483
+2025-08-07 22:59:41,996 - INFO - Note: Classical SVM integration not implemented. Consider quantum approximation techniques as per PDF Section 8.4.

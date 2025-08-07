@@ -68,7 +68,7 @@ class QSVM:
 
         # Initialize quantum kernel
         self.feature_map = ZZFeatureMap(
-            feature_dimension=feature_dim, reps=2, entanglement='full')
+            feature_dimension=feature_dim, reps=3, entanglement='linear')
         self.svm = None
         self.kernel_matrix = None
 
@@ -139,36 +139,26 @@ class QSVM:
         return scores
 
     def dynamic_oracle(self, qc, qubits, ancilla, state_indices, X_test):
-        """
-        Apply a dynamic fine oracle based on QSVM scores.
-        
-        Parameters:
-        - qc: Quantum circuit.
-        - qubits: Quantum register.
-        - ancilla: Ancilla register.
-        - state_indices: Indices of states to evaluate.
-        - X_test: Test data for QSVM scoring.
-        """
         scores = self.compute_scores(state_indices, X_test)
+        marked_count = 0
+        print("Debug: QSVM scores for states:")
         for idx, score in zip(state_indices, scores):
+            print(
+                f"  State {format(idx, f'0{self.n_qubits}b')}: score = {score:.4f}")
             if score > self.theta:
-                # Convert index to binary string (Qiskit ordering)
                 binary = format(idx, f'0{self.n_qubits}b')
-                # Apply X gates to match the state
                 for i, bit in enumerate(binary):
                     if bit == '0':
                         qc.x(qubits[i])
-                # Apply phase inversion
                 qc.mcx(qubits, ancilla[0], mode='noancilla')
                 qc.z(ancilla[0])
                 qc.mcx(qubits, ancilla[0], mode='noancilla')
-                # Uncompute X gates
                 for i, bit in enumerate(binary):
                     if bit == '0':
                         qc.x(qubits[i])
+                marked_count += 1
         print(
-            f"Debug: Dynamic QSVM oracle applied with threshold {self.theta:.4f}, marked {sum(score > self.theta for score in scores)} states")
-
+            f"Debug: Dynamic QSVM oracle applied with threshold {self.theta:.4f}, marked {marked_count} states")
     def feedback_loop(self, segc, qc, qubits, ancilla, state_indices, X_test):
         """
         Implement quantum-classical feedback loop to refine the threshold.
