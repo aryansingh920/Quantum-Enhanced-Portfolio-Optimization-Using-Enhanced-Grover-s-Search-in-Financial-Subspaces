@@ -79,29 +79,17 @@ class QSVM:
         print(f"Training samples: {len(self.X)}, Classes: {np.unique(self.y)}")
 
     def compute_quantum_kernel(self, X1, X2):
-        """
-        Compute the quantum kernel matrix using the feature map.
-        
-        Parameters:
-        - X1, X2: Data matrices for kernel computation.
-        
-        Returns:
-        - kernel_matrix: Quantum kernel matrix.
-        """
         kernel_matrix = np.zeros((len(X1), len(X2)))
         total = len(X1) * len(X2)
         count = 0
         for i, x1 in enumerate(X1):
             for j, x2 in enumerate(X2):
-                # Create quantum circuit for kernel computation
-                qc = QuantumCircuit(self.n_qubits)
-                # Apply feature map for x1
-                fm1 = self.feature_map.assign_parameters(x1)
-                qc.compose(fm1, inplace=True)
-                # Apply inverse feature map for x2
+                qc = QuantumCircuit(self.n_qubits)  # self.n_qubits = 4
+                fm1 = self.feature_map.assign_parameters(
+                    x1)  # feature_map expects 7 qubits
+                qc.compose(fm1, inplace=True)  # Error occurs here
                 fm2 = self.feature_map.assign_parameters(x2).inverse()
                 qc.compose(fm2, inplace=True)
-                # Simulate to get overlap
                 state = Statevector.from_instruction(qc)
                 kernel_matrix[i, j] = abs(state.data[0])**2
                 count += 1
@@ -110,16 +98,16 @@ class QSVM:
                         f"Computed {count}/{total} kernel entries ({count/total*100:.1f}%)")
         return kernel_matrix
 
-    def train(self):
-        """
-        Train the QSVM using a quantum kernel and classical SVM.
-        """
+    def train(self, X=None, y=None):
         print("Training QSVM...")
-        self.kernel_matrix = self.compute_quantum_kernel(
-            self.X_scaled, self.X_scaled)
+        X_train = X if X is not None else self.X_scaled
+        y_train = y if y is not None else self.y
+        self.kernel_matrix = self.compute_quantum_kernel(X_train, X_train)
         self.svm = SVC(kernel='precomputed')
-        self.svm.fit(self.kernel_matrix, self.y)
+        self.svm.fit(self.kernel_matrix, y_train)
         print("QSVM training completed.")
+
+
 
     def compute_scores(self, state_indices, X_test):
         """

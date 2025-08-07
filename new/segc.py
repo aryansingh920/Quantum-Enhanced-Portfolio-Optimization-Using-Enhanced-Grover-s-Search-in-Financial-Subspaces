@@ -5,19 +5,28 @@ from qiskit_aer import StatevectorSimulator
 
 
 class SEGCAlgorithm:
-    def __init__(self):
-        self.n = 7
+    def __init__(self, n_qubits, coarse_mask, target, coarse_iterations):
+        self.n = n_qubits
         self.N = 2 ** self.n
-        self.target = '0000101'  # Qiskit
-        self.target_standard = '1010000'  # Standard
-        self.N_c = 8
+        self.target = target[::-1]  # Convert standard to Qiskit ordering
+        self.target_standard = target
+        self.coarse_mask = coarse_mask
+        self.coarse_iterations = coarse_iterations
+        self.fine_iterations = 1
+        self.N_c = 2 ** coarse_mask.count('*')
         self.t = 1
-        self.coarse_iterations = 4
-        self.fine_iterations = 2
         self.theta_coarse = np.arcsin(np.sqrt(self.N_c / self.N))
         self.theta_fine = np.arcsin(np.sqrt(self.t / self.N_c))
+        self.simulator = StatevectorSimulator()
+        self.qc = None
+        self.qr = None
+        self.ar = None
+        self.cr = None
+        self.marked_states = [self.target]
+
         print(
-            f"SEGC Configuration:\nTarget (Qiskit): {self.target}, (Standard): {self.target_standard}\nN = {self.N}, N_c = {self.N_c}")
+            f"SEGC Configuration:\nTarget (Qiskit): {self.target}, (Standard): {self.target_standard}")
+        print(f"N = {self.N}, N_c = {self.N_c}")
         print(
             f"Coarse angle: {self.theta_coarse:.4f} rad\nFine angle: {self.theta_fine:.4f} rad")
         print(
@@ -25,26 +34,24 @@ class SEGCAlgorithm:
         print(
             f"Expected coarse subspace prob: {np.sin((2 * self.coarse_iterations + 1) * self.theta_coarse)**2:.4f}")
 
+    def initialize(self):
+        self.qr = QuantumRegister(self.n, 'q')
+        self.ar = QuantumRegister(1, 'anc')
+        self.cr = ClassicalRegister(self.n, 'c')
+        self.qc = QuantumCircuit(self.qr, self.ar, self.cr)
+        self.qc.h(self.qr)
+        print("Debug: Initialized superposition")
 
     def coarse_oracle(self, qc, qubits, ancilla):
-        # Mark all states with first 4 data qubits == 0 (q0..q3 == 0)
-        # 1) Map 0→1 on the first 4 controls so "all zeros" becomes "all ones"
-        qc.x(qubits[0:4])
-
-        # 2) Compute predicate (q0=q1=q2=q3=1) into ancilla
-        qc.mcx(qubits[0:4], ancilla[0], mode='noancilla')
-
-        # 3) Phase-kickback: flip phase iff ancilla==1
-        qc.z(ancilla[0])
-
-        # 4) Uncompute predicate; restore ancilla to |0>
-        qc.mcx(qubits[0:4], ancilla[0], mode='noancilla')
-
-        # 5) Undo the initial X
-        qc.x(qubits[0:4])
-
-        print("Debug: Coarse oracle (phase-kickback) applied for 0000****")
-
+        coarse_indices = [i for i, c in enumerate(
+            self.coarse_mask[::-1]) if c == '0']
+        if coarse_indices:
+            qc.x(qubits[coarse_indices])
+            qc.mcx(qubits[coarse_indices], ancilla[0], mode='noancilla')
+            qc.z(ancilla[0])
+            qc.mcx(qubits[coarse_indices], ancilla[0], mode='noancilla')
+            qc.x(qubits[coarse_indices])
+        print(f"Debug: Coarse oracle applied for {self.coarse_mask}")
 
     def coarse_diffuser(self, qc, qubits):
         qc.h(qubits)
@@ -57,30 +64,31 @@ class SEGCAlgorithm:
         print("Debug: Coarse diffuser applied")
 
     def fine_oracle(self, qc, qubits, ancilla):
-        for i in range(4):
-            qc.x(qubits[i])
-        qc.mcx(qubits[0:4], ancilla[0], mode='noancilla')
-        qc.x(qubits[5])
-        qc.h(ancilla[0])
-        qc.mcx([qubits[4], qubits[5], qubits[6]], ancilla[0], mode='noancilla')
-        qc.h(ancilla[0])
-        qc.x(qubits[5])
-        qc.mcx(qubits[0:4], ancilla[0], mode='noancilla')
-        for i in range(4):
-            qc.x(qubits[i])
-        print("Debug: Fine oracle applied")
+        for state in self.marked_states:
+            binary = state  # Already in Qiskit ordering
+            for i, bit in enumerate(binary):
+                if bit == '0':
+                    qc.x(qubits[i])
+            qc.mcx(qubits, ancilla[0], mode='noancilla')
+            qc.z(ancilla[0])
+            qc.mcx(qubits, ancilla[0], mode='noancilla')
+            for i, bit in enumerate(binary):
+                if bit == '0':
+                    qc.x(qubits[i])
+        print(
+            f"Debug: Fine oracle applied, marked {len(self.marked_states)} states")
 
     def partial_diffuser(self, qc, qubits, ancilla):
-        # Apply diffuser only to fine qubits (4, 5, 6) conditioned on coarse qubits (0–3)
-        coarse_qubits = qubits[0:4]
-        fine_qubits = qubits[4:7]
+        coarse_indices = [i for i, c in enumerate(
+            self.coarse_mask[::-1]) if c == '0']
+        fine_indices = [i for i in range(self.n) if i not in coarse_indices]
+        coarse_qubits = [qubits[i] for i in coarse_indices]
+        fine_qubits = [qubits[i] for i in fine_indices]
 
-        # Ensure coarse qubits are in |0000> for diffusion
-        for i in range(4):
-            qc.x(coarse_qubits[i])
-        qc.mcx(coarse_qubits, ancilla[0], mode='noancilla')
-
-        # Standard Grover diffuser for fine qubits
+        if coarse_qubits:
+            for q in coarse_qubits:
+                qc.x(q)
+            qc.mcx(coarse_qubits, ancilla[0], mode='noancilla')
         qc.h(fine_qubits)
         qc.x(fine_qubits)
         qc.h(fine_qubits[-1])
@@ -88,69 +96,57 @@ class SEGCAlgorithm:
         qc.h(fine_qubits[-1])
         qc.x(fine_qubits)
         qc.h(fine_qubits)
-
-        # Undo coarse control
-        qc.mcx(coarse_qubits, ancilla[0], mode='noancilla')
-        for i in range(4):
-            qc.x(coarse_qubits[i])
-
+        if coarse_qubits:
+            qc.mcx(coarse_qubits, ancilla[0], mode='noancilla')
+            for q in coarse_qubits:
+                qc.x(q)
         print("Debug: Enhanced partial diffuser applied")
 
-
-
-
-    def debug_oracle(self, oracle_type='coarse'):
-        qr = QuantumRegister(self.n, 'q')
-        ar = QuantumRegister(1, 'anc')
-        qc = QuantumCircuit(qr, ar)
-        if oracle_type == 'coarse':
-            qc.h(qr[4:7])
-            self.coarse_oracle(qc, qr, ar)
-        else:
-            qc.x(qr[4])
-            qc.x(qr[6])
-            self.fine_oracle(qc, qr, ar)
-        state = Statevector.from_instruction(qc)
-        target_idx = int(self.target, 2)
-        coarse_prob = sum(abs(state.data[i])**2 for i in range(8))
-        print(f"Debug {oracle_type} oracle:")
-        print(f"  Target amplitude = {state.data[target_idx]:.4f}")
-        print(f"  Coarse subspace prob = {coarse_prob:.4f}")
-        if oracle_type == 'coarse':
-            print("  Coarse-valid states (Qiskit ordering):")
-            for i in range(8):
-                state_str = format(i, '07b')
-                amp = state.data[i]
-                mark = '← TARGET' if state_str == self.target else ''
-                print(
-                    f"    {state_str}: {amp:.4f} (prob: {abs(amp)**2:.4f}) {mark}")
-
-    def create_circuit(self):
-        qr = QuantumRegister(self.n, 'q')
-        ar = QuantumRegister(1, 'anc')
-        cr = ClassicalRegister(self.n, 'c')
-        qc = QuantumCircuit(qr, ar, cr)
-        qc.h(qr)
-        print("Debug: Initialized superposition")
-        print("Executing coarse iterations...")
+    def run_coarse(self):
         for i in range(self.coarse_iterations):
             print(f"  Coarse iteration {i+1}/{self.coarse_iterations}")
-            self.coarse_oracle(qc, qr, ar)
-            self.coarse_diffuser(qc, qr)
-            state = Statevector.from_instruction(qc)
+            self.coarse_oracle(self.qc, self.qr, self.ar)
+            self.coarse_diffuser(self.qc, self.qr)
+            state = Statevector.from_instruction(self.qc)
             self.analyze_state(state, f"After coarse iteration {i+1}")
-        print("Executing fine iterations...")
-        for i in range(self.fine_iterations):
-            print(f"  Fine iteration {i+1}/{self.fine_iterations}")
-            self.fine_oracle(qc, qr, ar)
-            state = Statevector.from_instruction(qc)
-            self.analyze_state(state, f"After fine oracle {i+1}")
-            self.partial_diffuser(qc, qr, ar)
-            state = Statevector.from_instruction(qc)
-            self.analyze_state(state, f"After partial diffusion {i+1}")
-        final_state = Statevector.from_instruction(qc)
-        qc.measure(qr, cr)
-        return qc, final_state
+
+    def get_coarse_states(self):
+        coarse_states = []
+        for i in range(self.N):
+            binary = format(i, f'0{self.n}b')  # Qiskit ordering
+            if all(binary[j] == c for j, c in enumerate(self.coarse_mask[::-1]) if c != '*'):
+                coarse_states.append(binary)  # Return in Qiskit ordering
+        return coarse_states
+
+    def extract_features(self, state):
+        # Convert state (in standard ordering) to 7D features
+        # Qiskit ordering
+        return np.array([int(c) for c in state[::-1]], dtype=float)
+
+    def update_fine_oracle(self, marked_states):
+        self.marked_states = marked_states  # Already in Qiskit ordering
+        print(
+            f"Debug: Updated fine oracle with {len(self.marked_states)} marked states")
+
+    def run_fine_iteration(self):
+        print(f"  Fine iteration")
+        for _ in range(self.fine_iterations):
+            self.fine_oracle(self.qc, self.qr, self.ar)
+            state = Statevector.from_instruction(self.qc)
+            self.analyze_state(state, f"After fine oracle")
+            self.partial_diffuser(self.qc, self.qr, self.ar)
+            state = Statevector.from_instruction(self.qc)
+            self.analyze_state(state, f"After partial diffusion")
+        return state
+
+    def measure(self, shots=8192):
+        # Create a new circuit for measurement to avoid modifying self.qc
+        measure_qc = self.qc.copy()
+        measure_qc.measure(self.qr, self.cr)
+        job = self.simulator.run(measure_qc, shots=shots)
+        result = job.result()
+        counts = result.get_counts()
+        return counts
 
     def analyze_state(self, state, step_name):
         print(f"{step_name}:")
@@ -162,73 +158,20 @@ class SEGCAlgorithm:
             f"  Target {self.target} (Qiskit) / {self.target_standard} (Standard): prob: {target_prob:.4f}")
 
         coarse_prob = 0
-        for i in range(8):
-            state_str = format(i, '07b')
+        coarse_states = self.get_coarse_states()
+        for binary in coarse_states:
             for anc in ['0', '1']:
-                idx = int(anc + state_str, 2)
+                idx = int(anc + binary, 2)
                 coarse_prob += abs(state.data[idx])**2
         print(f"  Coarse subspace prob: {coarse_prob:.4f}")
 
-        print("  Coarse-valid states (Qiskit ordering, ancilla traced out):")
-        for i in range(8):
-            state_str = format(i, '07b')
-            prob = sum(abs(state.data[int(anc + state_str, 2)])
-                       ** 2 for anc in ['0', '1'])
-            mark = '← TARGET' if state_str == self.target else ''
-            print(f"    {state_str}: prob: {prob:.4f} {mark}")
+        print("  Coarse-valid states (Standard ordering, ancilla traced out):")
+        for binary in coarse_states:
+            prob = sum(
+                abs(state.data[int(anc + binary, 2)])**2 for anc in ['0', '1'])
+            # Convert to standard ordering for display
+            state_standard = binary[::-1]
+            mark = '← TARGET' if state_standard == self.target_standard else ''
+            print(f"    {state_standard}: prob: {prob:.4f} {mark}")
 
-        return target_prob  # Return the computed target probability
-
-    def run_simulation(self, qc, final_state):
-        simulator = StatevectorSimulator()
-        job = simulator.run(qc, shots=8192)
-        result = job.result()
-        counts = result.get_counts()
-        print("==================================================")
-        print("FINAL RESULTS")
-        print("==================================================")
-        total_shots = sum(counts.values())
-
-        # match Standard target
-        target_prob = counts.get(self.target_standard, 0) / total_shots
-
-        # coarse subspace probability: sum over all measured states where q0..3=0000
-        coarse_prob = sum(prob for bitstring, prob in (
-            (state[::-1], count/total_shots) for state, count in counts.items())
-            if bitstring.startswith("0000"))
-
-        # trace-out-based theoretical probability
-        target_idx_anc0 = int('0' + self.target, 2)
-        target_idx_anc1 = int('1' + self.target, 2)
-        theoretical_target_prob = (abs(final_state.data[target_idx_anc0])**2
-                                   + abs(final_state.data[target_idx_anc1])**2)
-
-        print(
-            f"Target state probability (Standard {self.target_standard}): {target_prob:.4f}")
-        print(f"Coarse subspace probability: {coarse_prob:.4f}")
-        print(
-            f"Theoretical target prob (traced ancilla): {theoretical_target_prob:.4f}")
-
-        print("Top 10 measured states (Standard ordering):")
-        sorted_counts = sorted(
-            counts.items(), key=lambda x: x[1], reverse=True)[:10]
-        for state, count in sorted_counts:
-            prob = count / total_shots
-            state_standard = state[::-1]
-            coarse_valid = 'coarse-valid' if state_standard.startswith(
-                "0000") else 'coarse-invalid'
-            mark = '← TARGET' if state == self.target_standard else ''
-            print(f"  {state_standard}: {prob:.4f} [{coarse_valid}] {mark}")
-
-
-def main():
-    segc = SEGCAlgorithm()
-    print("\nDebugging oracles...")
-    segc.debug_oracle('coarse')
-    segc.debug_oracle('fine')
-    qc, final_state = segc.create_circuit()
-    segc.run_simulation(qc, final_state)
-
-
-if __name__ == "__main__":
-    main()
+        return target_prob
