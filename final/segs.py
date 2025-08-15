@@ -1,4 +1,4 @@
-# segs.py  # UPDATED: Renamed from segc.py to match dissertation
+# segs.py
 # Strict SEGS per report:
 # - Uniform init on system; phase ancilla prepared in |->
 # - Coarse oracle: phase-flip on states matching coarse mask (using ancilla kickback)
@@ -21,7 +21,7 @@ class IterationSchedule:
     k_fine: int
 
 
-class SEGSAlgorithm:  # UPDATED: Renamed from SEGCAlgorithm
+class SEGSAlgorithm:
     """
     Bit order conventions:
       - Mask string is MSB..LSB (leftmost is bit n-1, rightmost is bit 0).
@@ -39,7 +39,6 @@ class SEGSAlgorithm:  # UPDATED: Renamed from SEGCAlgorithm
         self.qr = QuantumRegister(n_qubits, 'q')
         self.ar = QuantumRegister(1, 'anc')
         self.cr = ClassicalRegister(n_qubits, 'c')
-        # UPDATED: Name changed
         self.qc = QuantumCircuit(self.qr, self.ar, self.cr, name="SEGS")
 
     # ---------------- core steps ----------------
@@ -49,49 +48,42 @@ class SEGSAlgorithm:  # UPDATED: Renamed from SEGCAlgorithm
             self.qc.h(self.qr[i])
         self.qc.x(self.ar[0])
         self.qc.h(self.ar[0])
-        # UPDATED: Added log
         logging.info(
             "Circuit initialized: Hadamard on system, |-> on ancilla.")
 
     def _fixed_bits_lsb(self) -> List[Tuple[int, str]]:
-        """Return list of (lsb_index, value_char) for fixed bits, using LSB indexing for circuit ops."""
         rev = self.mask[::-1]  # LSB-first view
         fixed = [(i, b) for i, b in enumerate(rev) if b in ('0', '1')]
-        logging.debug(f"Fixed bits (LSB): {fixed}")  # UPDATED: Debug log
+        logging.debug(f"Fixed bits (LSB): {fixed}")
         return fixed
 
     def _free_bits_lsb(self) -> List[int]:
         rev = self.mask[::-1]
         free = [i for i, b in enumerate(rev) if b == '*']
-        logging.debug(f"Free bits (LSB): {free}")  # UPDATED: Debug log
+        logging.debug(f"Free bits (LSB): {free}")
         return free
 
     def coarse_oracle(self) -> None:
-        """Phase flip all states matching the mask using ancilla kickback."""
         fixed = self._fixed_bits_lsb()
         if not fixed:
             logging.debug("Coarse oracle skipped (mask is all '*').")
             return
 
-        # X-mask zeros among fixed bits
         zeros = [i for i, b in fixed if b == '0']
         for i in zeros:
             self.qc.x(self.qr[i])
 
         ctrls = [self.qr[i] for i, _ in fixed]
-        self.qc.mcx(ctrls, self.ar[0])  # X on ancilla in |-> adds a -1 phase
+        self.qc.mcx(ctrls, self.ar[0])
 
-        # Unmask
         for i in zeros:
             self.qc.x(self.qr[i])
-        logging.debug("Coarse oracle applied.")  # UPDATED: Debug log
+        logging.debug("Coarse oracle applied.")
 
     def coarse_diffuser(self) -> None:
-        """Standard Grover diffuser on ALL system qubits."""
         for i in range(self.n):
             self.qc.h(self.qr[i])
             self.qc.x(self.qr[i])
-        # reflection about |0...0>
         self.qc.h(self.qr[self.n - 1])
         self.qc.mcx([self.qr[i]
                     for i in range(self.n - 1)], self.qr[self.n - 1])
@@ -99,10 +91,9 @@ class SEGSAlgorithm:  # UPDATED: Renamed from SEGCAlgorithm
         for i in range(self.n):
             self.qc.x(self.qr[i])
             self.qc.h(self.qr[i])
-        logging.debug("Coarse diffuser applied.")  # UPDATED: Debug log
+        logging.debug("Coarse diffuser applied.")
 
     def fine_oracle_states(self, states_msb: Sequence[str]) -> None:
-        """Phase flip specific computational basis states (each given MSB..LSB)."""
         for s_msb in states_msb:
             assert len(s_msb) == self.n
             s_lsb = s_msb[::-1]
@@ -112,11 +103,9 @@ class SEGSAlgorithm:  # UPDATED: Renamed from SEGCAlgorithm
             self.qc.mcx([self.qr[i] for i in range(self.n)], self.ar[0])
             for i in zeros:
                 self.qc.x(self.qr[i])
-        # UPDATED: Debug log
         logging.debug(f"Fine oracle applied to {len(states_msb)} states.")
 
     def partial_diffuser(self) -> None:
-        """Diffuser only over free bits ('*' in mask)."""
         free = self._free_bits_lsb()
         if not free:
             logging.debug("Partial diffuser skipped (no free bits).")
@@ -139,7 +128,7 @@ class SEGSAlgorithm:  # UPDATED: Renamed from SEGCAlgorithm
         for i in free:
             self.qc.x(self.qr[i])
             self.qc.h(self.qr[i])
-        logging.debug("Partial diffuser applied.")  # UPDATED: Debug log
+        logging.debug("Partial diffuser applied.")
 
     # ---------------- driver helpers ----------------
     def run_coarse(self) -> None:

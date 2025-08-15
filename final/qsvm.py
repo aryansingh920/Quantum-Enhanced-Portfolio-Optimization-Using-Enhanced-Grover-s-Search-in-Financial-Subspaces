@@ -4,10 +4,10 @@ from __future__ import annotations
 from dataclasses import dataclass
 from typing import Callable, Dict, List, Sequence, Optional
 import numpy as np
-import logging  # UPDATED: Added for enhanced logging
+import logging
 
 try:
-    from qiskit_machine_learning.algorithms.classifiers import QSVC  # type: ignore
+    from qiskit_machine_learning.algorithms.classifiers import QSVC
     _HAS_QSVC = True
 except Exception:
     _HAS_QSVC = False
@@ -17,9 +17,9 @@ try:
     from sklearn.preprocessing import StandardScaler
     from sklearn.pipeline import make_pipeline
 except Exception:
-    SVC = None  # type: ignore
-    StandardScaler = None  # type: ignore
-    make_pipeline = None  # type: ignore
+    SVC = None
+    StandardScaler = None
+    make_pipeline = None
 
 
 @dataclass
@@ -40,23 +40,22 @@ class QSVM:
         if self.cfg.use_quantum and _HAS_QSVC:
             self.model = QSVC()
             self.model.fit(X, y)
-            # UPDATED: Log after fit
+            # UPDATED: per report QSVM
             logging.info("QSVM fitted using quantum QSVC.")
         else:
             if SVC is None:
                 raise RuntimeError("scikit-learn not available")
             self.model = make_pipeline(StandardScaler(), SVC(
-                C=self.cfg.C, gamma=self.cfg.gamma, probability=False))
+                C=self.cfg.C, gamma=self.cfg.gamma))
             self.model.fit(X, y)
-            # UPDATED: Log model details
             svm = self.model.named_steps['svc']
             logging.info(
                 f"Classical SVM fitted: C={svm.C}, gamma={svm.gamma}, n_support={len(svm.support_)}")
 
     def _decision(self, X: np.ndarray) -> np.ndarray:
         if hasattr(self.model, "decision_function"):
-            return self.model.decision_function(X)  # type: ignore
-        preds = self.model.predict(X)  # type: ignore
+            return self.model.decision_function(X)
+        preds = self.model.predict(X)
         return 2 * (preds.astype(float)) - 1.0
 
     def select_marked_states(
@@ -65,7 +64,6 @@ class QSVM:
         coarse_selector: Callable[[int], bool],
         n: int,
     ) -> List[str]:
-        """Return selected MSB..LSB bitstrings inside coarse subspace."""
         if self.model is None:
             raise RuntimeError("fit() first")
 
@@ -76,7 +74,6 @@ class QSVM:
         X = np.vstack([features_map[i] for i in idx])
         scores = self._decision(X)
 
-        # UPDATED: Log decision scores for debugging
         logging.info(f"QSVM decision scores for {len(idx)} coarse states:")
         for j, s in enumerate(scores):
             logging.info(f"  State {idx[j]}: score={s:.4f}")

@@ -2,6 +2,7 @@
 === init/hadamard ===
 Coarse mass: 0.250000
 Highlights (target states):
+  Total highlight prob (p_any): 0.039062
   1001101: 0.007812
   1101101: 0.007812
   1001111: 0.007812
@@ -37,6 +38,7 @@ Top states (coarse-only):
 === coarse/oracle_1 ===
 Coarse mass: 0.250000
 Highlights (target states):
+  Total highlight prob (p_any): 0.039062
   1001101: 0.007812
   1101101: 0.007812
   1001111: 0.007812
@@ -72,6 +74,7 @@ Top states (coarse-only):
 === coarse/diffuser_1 ===
 Coarse mass: 1.000000
 Highlights (target states):
+  Total highlight prob (p_any): 0.156250
   1001101: 0.031250
   1101101: 0.031250
   1001111: 0.031250
@@ -107,6 +110,7 @@ Top states (coarse-only):
 === fine/oracle_1 ===
 Coarse mass: 1.000000
 Highlights (target states):
+  Total highlight prob (p_any): 0.156250
   1001101: 0.031250
   1101101: 0.031250
   1001111: 0.031250
@@ -142,6 +146,7 @@ Top states (coarse-only):
 === fine/diffuser_1 ===
 Coarse mass: 1.000000
 Highlights (target states):
+  Total highlight prob (p_any): 0.881348
   1001101: 0.176270
   1101101: 0.176270
   1001111: 0.176270
