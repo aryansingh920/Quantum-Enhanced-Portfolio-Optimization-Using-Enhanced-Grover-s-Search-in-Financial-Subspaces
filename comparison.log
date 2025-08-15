@@ -1,0 +1,718 @@
+2025-08-08 22:16:30,078 - INFO - Run 1/5
+2025-08-08 22:16:30,078 - INFO - Starting baseline SEGC
+2025-08-08 22:16:30,078 - INFO - Running 4 coarse iterations
+2025-08-08 22:16:30,178 - INFO - Coarse phase yielded 8 candidate states
+2025-08-08 22:16:30,345 - INFO - Baseline SEGC top-5 outcomes: [('0000000', 0.0701904296875), ('1100000', 0.0045166015625), ('1000000', 0.004150390625), ('1010000', 0.003662109375), ('1110000', 0.0030517578125)]
+2025-08-08 22:16:30,345 - INFO - Baseline SEGC Run 1: Target prob=0.0037, Coarse prob=0.0929, η=0.0072
+2025-08-08 22:16:30,345 - INFO - Starting QSVM-enhanced SEGC
+2025-08-08 22:16:30,345 - INFO - Running 4 coarse iterations
+2025-08-08 22:16:30,464 - INFO - Coarse phase yielded 8 candidate states
+2025-08-08 22:16:30,465 - INFO - Training QSVM on 8 samples
+2025-08-08 22:16:55,574 - INFO - Run 1/5
+2025-08-08 22:16:55,574 - INFO - Starting baseline SEGC
+2025-08-08 22:16:55,575 - INFO - Running 4 coarse iterations
+2025-08-08 22:16:55,670 - INFO - Coarse phase yielded 8 candidate states
+2025-08-08 22:16:55,827 - INFO - Baseline SEGC top-5 outcomes: [('0000000', 0.06982421875), ('1110000', 0.004150390625), ('1000000', 0.0040283203125), ('0110000', 0.00390625), ('0010000', 0.0037841796875)]
+2025-08-08 22:16:55,827 - INFO - Baseline SEGC Run 1: Target prob=0.0031, Coarse prob=0.0955, η=0.0060
+2025-08-08 22:16:55,827 - INFO - Starting QSVM-enhanced SEGC
+2025-08-08 22:16:55,827 - INFO - Running 4 coarse iterations
+2025-08-08 22:16:55,946 - INFO - Coarse phase yielded 8 candidate states
+2025-08-08 22:16:55,946 - INFO - Training QSVM on 8 samples
+2025-08-08 22:17:45,545 - INFO - Feedback 1/5: threshold=0.100, marked=0
+2025-08-08 22:17:45,545 - WARNING - No states marked above threshold – forcing target_state
+2025-08-08 22:17:46,028 - INFO - Feedback 1 top-5 coarse-subspace probs: [('0000000', 0.004638671875), ('1100000', 0.0040283203125), ('1010000', 0.0040283203125), ('0110000', 0.00390625), ('1110000', 0.00390625)]
+2025-08-08 22:17:49,717 - INFO - Feedback 2/5: threshold=-0.047, marked=2
+2025-08-08 22:17:50,604 - INFO - Feedback 2 top-5 coarse-subspace probs: [('0000000', 0.018310546875), ('1000000', 0.0042724609375), ('0100000', 0.0042724609375), ('1010000', 0.0040283203125), ('1100000', 0.0028076171875)]
+2025-08-08 22:17:54,296 - INFO - Feedback 3/5: threshold=-0.047, marked=2
+2025-08-08 22:17:55,568 - INFO - Feedback 3 top-5 coarse-subspace probs: [('0000000', 0.0443115234375), ('1110000', 0.005126953125), ('0100000', 0.0042724609375), ('0010000', 0.0042724609375), ('1100000', 0.004150390625)]
+2025-08-08 22:17:59,279 - INFO - Feedback 4/5: threshold=-0.047, marked=2
+2025-08-08 22:18:00,968 - INFO - Feedback 4 top-5 coarse-subspace probs: [('0000000', 0.0059814453125), ('1010000', 0.00439453125), ('0110000', 0.0040283203125), ('1100000', 0.0037841796875), ('1000000', 0.003662109375)]
+2025-08-08 22:18:04,682 - INFO - Feedback 5/5: threshold=-0.047, marked=2
+2025-08-08 22:18:06,781 - INFO - Feedback 5 top-5 coarse-subspace probs: [('0000000', 0.0185546875), ('1000000', 0.004638671875), ('1100000', 0.00390625), ('0110000', 0.00390625), ('0010000', 0.0037841796875)]
+2025-08-08 22:18:06,781 - INFO - Running final fine-phase measurement
+2025-08-08 22:18:07,135 - INFO - QSVM-SEGC final top-10 outcomes: [('0000101', 3787), ('0000000', 155), ('0000001', 153), ('0000110', 152), ('0000100', 151), ('0000011', 150), ('0000111', 146), ('0000010', 143), ('1010111', 44), ('1111101', 43)]
+2025-08-08 22:18:07,136 - INFO - QSVM-SEGC Run 1: Target prob=0.0033, Coarse prob=0.0447, η=0.0111
+2025-08-08 22:18:07,136 - INFO - Run 2/5
+2025-08-08 22:18:07,136 - INFO - Starting baseline SEGC
+2025-08-08 22:18:07,136 - INFO - Running 4 coarse iterations
+2025-08-08 22:18:07,237 - INFO - Coarse phase yielded 8 candidate states
+2025-08-08 22:18:07,394 - INFO - Baseline SEGC top-5 outcomes: [('0000000', 0.0712890625), ('1000000', 0.00537109375), ('1100000', 0.0048828125), ('1010000', 0.0042724609375), ('0010000', 0.0032958984375)]
+2025-08-08 22:18:07,394 - INFO - Baseline SEGC Run 2: Target prob=0.0043, Coarse prob=0.0979, η=0.0084
+2025-08-08 22:18:07,394 - INFO - Starting QSVM-enhanced SEGC
+2025-08-08 22:18:07,394 - INFO - Running 4 coarse iterations
+2025-08-08 22:18:07,495 - INFO - Coarse phase yielded 8 candidate states
+2025-08-08 22:18:07,495 - INFO - Training QSVM on 8 samples
+2025-08-08 22:18:57,633 - INFO - Feedback 1/5: threshold=0.100, marked=7
+2025-08-08 22:18:58,989 - INFO - Feedback 1 top-5 coarse-subspace probs: [('0000000', 0.00390625), ('0100000', 0.00390625), ('0010000', 0.00390625), ('1110000', 0.00390625), ('1100000', 0.0035400390625)]
+2025-08-08 22:19:02,676 - INFO - Feedback 2/5: threshold=0.258, marked=2
+2025-08-08 22:19:04,677 - INFO - Feedback 2 top-5 coarse-subspace probs: [('0000000', 0.01904296875), ('0110000', 0.0045166015625), ('1010000', 0.0042724609375), ('1110000', 0.00341796875), ('1000000', 0.0030517578125)]
+2025-08-08 22:19:08,410 - INFO - Feedback 3/5: threshold=0.258, marked=2
+2025-08-08 22:19:10,834 - INFO - Feedback 3 top-5 coarse-subspace probs: [('0000000', 0.0037841796875), ('0100000', 0.00341796875), ('0010000', 0.003173828125), ('1110000', 0.003173828125), ('1010000', 0.0028076171875)]
+2025-08-08 22:19:14,532 - INFO - Feedback 4/5: threshold=0.258, marked=2
+2025-08-08 22:19:17,388 - INFO - Feedback 4 top-5 coarse-subspace probs: [('0000000', 0.0047607421875), ('1010000', 0.0042724609375), ('1100000', 0.004150390625), ('1110000', 0.0040283203125), ('0100000', 0.00390625)]
+2025-08-08 22:19:21,105 - INFO - Feedback 5/5: threshold=0.258, marked=2
+2025-08-08 22:19:24,367 - INFO - Feedback 5 top-5 coarse-subspace probs: [('0000000', 0.020263671875), ('0010000', 0.0045166015625), ('1100000', 0.0040283203125), ('1110000', 0.00390625), ('1010000', 0.003662109375)]
+2025-08-08 22:19:24,368 - INFO - Running final fine-phase measurement
+2025-08-08 22:19:24,767 - INFO - QSVM-SEGC final top-10 outcomes: [('0000010', 3685), ('0000110', 168), ('0000011', 160), ('0000111', 155), ('0000000', 153), ('0000100', 149), ('0000001', 140), ('0000101', 126), ('0100000', 44), ('0101000', 41)]
+2025-08-08 22:19:24,767 - INFO - QSVM-SEGC Run 2: Target prob=0.0044, Coarse prob=0.0452, η=0.0149
+2025-08-08 22:19:24,767 - INFO - Run 3/5
+2025-08-08 22:19:24,767 - INFO - Starting baseline SEGC
+2025-08-08 22:19:24,767 - INFO - Running 4 coarse iterations
+2025-08-08 22:19:24,879 - INFO - Coarse phase yielded 8 candidate states
+2025-08-08 22:19:25,038 - INFO - Baseline SEGC top-5 outcomes: [('0000000', 0.07080078125), ('0100000', 0.0048828125), ('1100000', 0.0047607421875), ('1110000', 0.0040283203125), ('0010000', 0.0037841796875)]
+2025-08-08 22:19:25,038 - INFO - Baseline SEGC Run 3: Target prob=0.0027, Coarse prob=0.0977, η=0.0053
+2025-08-08 22:19:25,038 - INFO - Starting QSVM-enhanced SEGC
+2025-08-08 22:19:25,039 - INFO - Running 4 coarse iterations
+2025-08-08 22:19:25,140 - INFO - Coarse phase yielded 8 candidate states
+2025-08-08 22:19:25,141 - INFO - Training QSVM on 8 samples
+2025-08-08 22:20:15,372 - INFO - Feedback 1/5: threshold=0.100, marked=3
+2025-08-08 22:20:16,145 - INFO - Feedback 1 top-5 coarse-subspace probs: [('0000000', 0.1099853515625), ('1010000', 0.0037841796875), ('0110000', 0.003662109375), ('0010000', 0.0032958984375), ('1100000', 0.0030517578125)]
+2025-08-08 22:20:19,887 - INFO - Feedback 2/5: threshold=0.182, marked=2
+2025-08-08 22:20:21,207 - INFO - Feedback 2 top-5 coarse-subspace probs: [('0000000', 0.0157470703125), ('1010000', 0.005126953125), ('1100000', 0.004150390625), ('1110000', 0.003662109375), ('1000000', 0.0035400390625)]
+2025-08-08 22:20:25,024 - INFO - Feedback 3/5: threshold=0.182, marked=2
+2025-08-08 22:20:26,652 - INFO - Feedback 3 top-5 coarse-subspace probs: [('0000000', 0.0062255859375), ('0100000', 0.00439453125), ('1110000', 0.0040283203125), ('1010000', 0.003662109375), ('1000000', 0.0035400390625)]
+2025-08-08 22:20:30,376 - INFO - Feedback 4/5: threshold=0.182, marked=2
+2025-08-08 22:20:32,449 - INFO - Feedback 4 top-5 coarse-subspace probs: [('0000000', 0.1214599609375), ('0010000', 0.004150390625), ('1110000', 0.00390625), ('1100000', 0.00341796875), ('1000000', 0.0030517578125)]
+2025-08-08 22:20:36,184 - INFO - Feedback 5/5: threshold=0.182, marked=2
+2025-08-08 22:20:38,671 - INFO - Feedback 5 top-5 coarse-subspace probs: [('0000000', 0.0147705078125), ('1110000', 0.004150390625), ('1010000', 0.00390625), ('0110000', 0.0037841796875), ('0010000', 0.00341796875)]
+2025-08-08 22:20:38,671 - INFO - Running final fine-phase measurement
+2025-08-08 22:20:39,047 - INFO - QSVM-SEGC final top-10 outcomes: [('0000101', 1362), ('0000111', 1356), ('0000110', 1320), ('0000100', 168), ('0000010', 163), ('0000000', 151), ('0000001', 144), ('0000011', 143), ('0101100', 43), ('1001001', 40)]
+2025-08-08 22:20:39,047 - INFO - QSVM-SEGC Run 3: Target prob=0.0028, Coarse prob=0.0388, η=0.0095
+2025-08-08 22:20:39,047 - INFO - Run 4/5
+2025-08-08 22:20:39,047 - INFO - Starting baseline SEGC
+2025-08-08 22:20:39,047 - INFO - Running 4 coarse iterations
+2025-08-08 22:20:39,147 - INFO - Coarse phase yielded 8 candidate states
+2025-08-08 22:20:39,297 - INFO - Baseline SEGC top-5 outcomes: [('0000000', 0.071044921875), ('1010000', 0.004638671875), ('0010000', 0.0045166015625), ('0100000', 0.003662109375), ('0110000', 0.00341796875)]
+2025-08-08 22:20:39,297 - INFO - Baseline SEGC Run 4: Target prob=0.0046, Coarse prob=0.0964, η=0.0091
+2025-08-08 22:20:39,297 - INFO - Starting QSVM-enhanced SEGC
+2025-08-08 22:20:39,297 - INFO - Running 4 coarse iterations
+2025-08-08 22:20:39,396 - INFO - Coarse phase yielded 8 candidate states
+2025-08-08 22:20:39,396 - INFO - Training QSVM on 8 samples
+2025-08-08 22:21:29,967 - INFO - Feedback 1/5: threshold=0.100, marked=0
+2025-08-08 22:21:29,967 - WARNING - No states marked above threshold – forcing target_state
+2025-08-08 22:21:30,438 - INFO - Feedback 1 top-5 coarse-subspace probs: [('0000000', 0.004150390625), ('1010000', 0.00390625), ('0100000', 0.0035400390625), ('0110000', 0.003173828125), ('1100000', 0.0030517578125)]
+2025-08-08 22:21:34,130 - INFO - Feedback 2/5: threshold=-0.181, marked=2
+2025-08-08 22:21:35,008 - INFO - Feedback 2 top-5 coarse-subspace probs: [('0000000', 0.01708984375), ('1000000', 0.00439453125), ('0100000', 0.0042724609375), ('1010000', 0.0042724609375), ('0110000', 0.00341796875)]
+2025-08-08 22:21:38,715 - INFO - Feedback 3/5: threshold=-0.181, marked=2
+2025-08-08 22:21:40,029 - INFO - Feedback 3 top-5 coarse-subspace probs: [('0000000', 0.038330078125), ('0110000', 0.0040283203125), ('1100000', 0.00390625), ('0100000', 0.0037841796875), ('0010000', 0.003662109375)]
+2025-08-08 22:21:43,735 - INFO - Feedback 4/5: threshold=-0.181, marked=2
+2025-08-08 22:21:45,417 - INFO - Feedback 4 top-5 coarse-subspace probs: [('0000000', 0.005615234375), ('1100000', 0.005615234375), ('1000000', 0.0040283203125), ('0010000', 0.00390625), ('0100000', 0.003662109375)]
+2025-08-08 22:21:49,137 - INFO - Feedback 5/5: threshold=-0.181, marked=2
+2025-08-08 22:21:51,248 - INFO - Feedback 5 top-5 coarse-subspace probs: [('0000000', 0.01806640625), ('1000000', 0.004638671875), ('1100000', 0.0040283203125), ('1110000', 0.00390625), ('0100000', 0.0032958984375)]
+2025-08-08 22:21:51,248 - INFO - Running final fine-phase measurement
+2025-08-08 22:21:51,621 - INFO - QSVM-SEGC final top-10 outcomes: [('0000101', 3728), ('0000111', 159), ('0000010', 156), ('0000000', 154), ('0000100', 152), ('0000011', 151), ('0000001', 139), ('0000110', 132), ('0111011', 41), ('0111101', 40)]
+2025-08-08 22:21:51,621 - INFO - QSVM-SEGC Run 4: Target prob=0.0031, Coarse prob=0.0435, η=0.0103
+2025-08-08 22:21:51,621 - INFO - Run 5/5
+2025-08-08 22:21:51,621 - INFO - Starting baseline SEGC
+2025-08-08 22:21:51,621 - INFO - Running 4 coarse iterations
+2025-08-08 22:21:51,753 - INFO - Coarse phase yielded 8 candidate states
+2025-08-08 22:21:51,916 - INFO - Baseline SEGC top-5 outcomes: [('0000000', 0.07373046875), ('1000000', 0.00439453125), ('0010000', 0.004150390625), ('1100000', 0.0040283203125), ('0110000', 0.00390625)]
+2025-08-08 22:21:51,916 - INFO - Baseline SEGC Run 5: Target prob=0.0024, Coarse prob=0.0997, η=0.0048
+2025-08-08 22:21:51,916 - INFO - Starting QSVM-enhanced SEGC
+2025-08-08 22:21:51,916 - INFO - Running 4 coarse iterations
+2025-08-08 22:21:52,018 - INFO - Coarse phase yielded 8 candidate states
+2025-08-08 22:21:52,018 - INFO - Training QSVM on 8 samples
+2025-08-08 22:22:41,997 - INFO - Feedback 1/5: threshold=0.100, marked=0
+2025-08-08 22:22:41,999 - WARNING - No states marked above threshold – forcing target_state
+2025-08-08 22:22:42,513 - INFO - Feedback 1 top-5 coarse-subspace probs: [('0000000', 0.0050048828125), ('1000000', 0.004638671875), ('1110000', 0.0045166015625), ('0100000', 0.0037841796875), ('0010000', 0.0032958984375)]
+2025-08-08 22:22:46,234 - INFO - Feedback 2/5: threshold=-0.060, marked=2
+2025-08-08 22:22:47,069 - INFO - Feedback 2 top-5 coarse-subspace probs: [('0000000', 0.018798828125), ('1110000', 0.0040283203125), ('0110000', 0.003662109375), ('0010000', 0.0035400390625), ('1010000', 0.003173828125)]
+2025-08-08 22:22:50,766 - INFO - Feedback 3/5: threshold=-0.060, marked=2
+2025-08-08 22:22:52,034 - INFO - Feedback 3 top-5 coarse-subspace probs: [('0000000', 0.0406494140625), ('1100000', 0.005126953125), ('1000000', 0.0042724609375), ('0010000', 0.0042724609375), ('0110000', 0.0037841796875)]
+2025-08-08 22:22:55,735 - INFO - Feedback 4/5: threshold=-0.060, marked=2
+2025-08-08 22:22:57,421 - INFO - Feedback 4 top-5 coarse-subspace probs: [('1000000', 0.004638671875), ('1110000', 0.0040283203125), ('0110000', 0.00390625), ('0100000', 0.003662109375), ('1100000', 0.0032958984375)]
+2025-08-08 22:23:01,163 - INFO - Feedback 5/5: threshold=-0.060, marked=2
+2025-08-08 22:23:03,263 - INFO - Feedback 5 top-5 coarse-subspace probs: [('0000000', 0.017333984375), ('0010000', 0.0042724609375), ('1010000', 0.00390625), ('0110000', 0.00390625), ('1000000', 0.0037841796875)]
+2025-08-08 22:23:03,263 - INFO - Running final fine-phase measurement
+2025-08-08 22:23:03,650 - INFO - QSVM-SEGC final top-10 outcomes: [('0000111', 3643), ('0000000', 168), ('0000100', 166), ('0000001', 158), ('0000011', 155), ('0000101', 150), ('0000110', 144), ('0000010', 144), ('0001011', 41), ('1111000', 41)]
+2025-08-08 22:23:03,651 - INFO - QSVM-SEGC Run 5: Target prob=0.0033, Coarse prob=0.0424, η=0.0111
+2025-08-08 22:23:03,653 - INFO - Statistical Analysis:
+2025-08-08 22:23:03,653 - INFO - Baseline SEGC: Mean target prob=0.0034, Std=0.0009
+2025-08-08 22:23:03,653 - INFO - QSVM-SEGC: Mean target prob=0.0034, Std=0.0005
+2025-08-08 22:23:03,653 - INFO - T-test: t=0.0946, p-value=0.9269
+2025-08-08 22:23:03,653 - INFO - Relative improvement: -1.43%
+2025-08-08 22:23:03,653 - INFO - Efficiency (η): Baseline=0.0067, QSVM-SEGC=0.0114
+2025-08-08 22:23:03,653 - INFO - Simulating NISQ noise effects
+2025-08-08 22:25:41,040 - INFO - Run 1/5
+2025-08-08 22:25:41,040 - INFO - Starting baseline SEGC
+2025-08-08 22:25:41,040 - INFO - Running 4 coarse iterations
+2025-08-08 22:25:41,137 - INFO - Coarse phase yielded 8 candidate states
+2025-08-08 22:25:41,298 - INFO - Baseline SEGC top-5 outcomes: [('0000000', 0.074951171875), ('1000000', 0.00439453125), ('0110000', 0.0035400390625), ('1110000', 0.0035400390625), ('1100000', 0.0030517578125)]
+2025-08-08 22:25:41,298 - INFO - Baseline SEGC Run 1: Target prob=0.0026, Coarse prob=0.0970, η=0.0050
+2025-08-08 22:25:41,298 - INFO - Starting QSVM-enhanced SEGC
+2025-08-08 22:25:41,298 - INFO - Running 4 coarse iterations
+2025-08-08 22:25:41,419 - INFO - Coarse phase yielded 8 candidate states
+2025-08-08 22:25:41,419 - INFO - Training QSVM on 8 samples
+2025-08-08 22:27:40,563 - INFO - Run 1/5
+2025-08-08 22:27:40,563 - INFO - Starting baseline SEGC
+2025-08-08 22:27:40,563 - INFO - Running 4 coarse iterations
+2025-08-08 22:27:40,658 - INFO - Coarse phase yielded 8 candidate states
+2025-08-08 22:27:40,818 - INFO - Baseline SEGC top-5 outcomes: [('0000000', 0.076416015625), ('0110000', 0.0045166015625), ('1000000', 0.003662109375), ('0010000', 0.00341796875), ('1110000', 0.00341796875)]
+2025-08-08 22:27:40,818 - INFO - Baseline SEGC Run 1: Target prob=0.0020, Coarse prob=0.0996, η=0.0038
+2025-08-08 22:27:40,818 - INFO - Starting QSVM-enhanced SEGC
+2025-08-08 22:27:40,818 - INFO - Running 4 coarse iterations
+2025-08-08 22:27:40,937 - INFO - Coarse phase yielded 8 candidate states
+2025-08-08 22:27:40,937 - INFO - Training QSVM on 8 samples
+2025-08-08 22:28:30,659 - INFO - Feedback 1/5: threshold=0.100, marked=0
+2025-08-08 22:28:30,659 - WARNING - No states marked above threshold – forcing target_state
+2025-08-08 22:28:31,153 - INFO - Feedback 1 top-5 coarse-subspace probs: [('0100000', 0.004150390625), ('0000000', 0.0040283203125), ('1110000', 0.0040283203125), ('0010000', 0.00390625), ('1100000', 0.00341796875)]
+2025-08-08 22:28:34,890 - INFO - Feedback 2/5: threshold=-0.035, marked=2
+2025-08-08 22:28:35,757 - INFO - Feedback 2 top-5 coarse-subspace probs: [('0000000', 0.015625), ('0010000', 0.004638671875), ('1100000', 0.00390625), ('0110000', 0.00390625), ('0100000', 0.0035400390625)]
+2025-08-08 22:28:39,507 - INFO - Feedback 3/5: threshold=-0.035, marked=2
+2025-08-08 22:28:40,782 - INFO - Feedback 3 top-5 coarse-subspace probs: [('0000000', 0.039306640625), ('1000000', 0.0037841796875), ('1100000', 0.0037841796875), ('1010000', 0.003662109375), ('1110000', 0.00341796875)]
+2025-08-08 22:28:44,531 - INFO - Feedback 4/5: threshold=-0.035, marked=2
+2025-08-08 22:28:46,220 - INFO - Feedback 4 top-5 coarse-subspace probs: [('1010000', 0.0042724609375), ('0010000', 0.0037841796875), ('0110000', 0.003662109375), ('0000000', 0.00341796875), ('1000000', 0.00341796875)]
+2025-08-08 22:28:49,959 - INFO - Feedback 5/5: threshold=-0.035, marked=2
+2025-08-08 22:28:52,065 - INFO - Feedback 5 top-5 coarse-subspace probs: [('0000000', 0.0186767578125), ('0110000', 0.0040283203125), ('1010000', 0.0035400390625), ('0010000', 0.00341796875), ('0100000', 0.003173828125)]
+2025-08-08 22:28:52,065 - INFO - Running final fine-phase measurement
+2025-08-08 22:28:52,404 - INFO - QSVM-SEGC final top-10 outcomes: [('0000101', 3648), ('0000001', 175), ('0000011', 169), ('0000111', 159), ('0000000', 150), ('0000010', 149), ('0000110', 148), ('0000100', 142), ('1000001', 41), ('1010111', 40)]
+2025-08-08 22:28:52,404 - INFO - QSVM-SEGC Run 1: Target prob=0.0029, Coarse prob=0.0419, η=0.0099
+2025-08-08 22:28:52,404 - INFO - Run 2/5
+2025-08-08 22:28:52,404 - INFO - Starting baseline SEGC
+2025-08-08 22:28:52,404 - INFO - Running 4 coarse iterations
+2025-08-08 22:28:52,506 - INFO - Coarse phase yielded 8 candidate states
+2025-08-08 22:28:52,681 - INFO - Baseline SEGC top-5 outcomes: [('0000000', 0.0723876953125), ('1000000', 0.0045166015625), ('0010000', 0.0040283203125), ('1110000', 0.0040283203125), ('0110000', 0.00390625)]
+2025-08-08 22:28:52,681 - INFO - Baseline SEGC Run 2: Target prob=0.0033, Coarse prob=0.0981, η=0.0064
+2025-08-08 22:28:52,681 - INFO - Starting QSVM-enhanced SEGC
+2025-08-08 22:28:52,681 - INFO - Running 4 coarse iterations
+2025-08-08 22:28:52,785 - INFO - Coarse phase yielded 8 candidate states
+2025-08-08 22:28:52,785 - INFO - Training QSVM on 8 samples
+2025-08-08 22:29:42,943 - INFO - Feedback 1/5: threshold=0.100, marked=0
+2025-08-08 22:29:42,943 - WARNING - No states marked above threshold – forcing target_state
+2025-08-08 22:29:43,449 - INFO - Feedback 1 top-5 coarse-subspace probs: [('0000000', 0.0047607421875), ('1010000', 0.0042724609375), ('1000000', 0.0040283203125), ('0110000', 0.00390625), ('0100000', 0.0035400390625)]
+2025-08-08 22:29:47,185 - INFO - Feedback 2/5: threshold=-0.273, marked=2
+2025-08-08 22:29:48,060 - INFO - Feedback 2 top-5 coarse-subspace probs: [('0000000', 0.0155029296875), ('1110000', 0.0047607421875), ('1100000', 0.0035400390625), ('0110000', 0.0035400390625), ('1010000', 0.00341796875)]
+2025-08-08 22:29:51,798 - INFO - Feedback 3/5: threshold=-0.273, marked=2
+2025-08-08 22:29:53,074 - INFO - Feedback 3 top-5 coarse-subspace probs: [('0000000', 0.040283203125), ('0100000', 0.0040283203125), ('1110000', 0.003662109375), ('1000000', 0.0035400390625), ('1100000', 0.003173828125)]
+2025-08-08 22:29:56,809 - INFO - Feedback 4/5: threshold=-0.273, marked=2
+2025-08-08 22:29:58,491 - INFO - Feedback 4 top-5 coarse-subspace probs: [('0000000', 0.006103515625), ('1000000', 0.005126953125), ('0010000', 0.004150390625), ('1100000', 0.0037841796875), ('0110000', 0.0037841796875)]
+2025-08-08 22:30:02,230 - INFO - Feedback 5/5: threshold=-0.273, marked=2
+2025-08-08 22:30:04,336 - INFO - Feedback 5 top-5 coarse-subspace probs: [('0000000', 0.01708984375), ('0100000', 0.0052490234375), ('1100000', 0.0045166015625), ('1010000', 0.0042724609375), ('1110000', 0.00390625)]
+2025-08-08 22:30:04,337 - INFO - Running final fine-phase measurement
+2025-08-08 22:30:04,686 - INFO - QSVM-SEGC final top-10 outcomes: [('0000101', 3738), ('0000011', 169), ('0000010', 162), ('0000100', 159), ('0000111', 147), ('0000110', 143), ('0000000', 138), ('0000001', 138), ('1010101', 42), ('1100101', 41)]
+2025-08-08 22:30:04,686 - INFO - QSVM-SEGC Run 2: Target prob=0.0038, Coarse prob=0.0463, η=0.0128
+2025-08-08 22:30:04,686 - INFO - Run 3/5
+2025-08-08 22:30:04,686 - INFO - Starting baseline SEGC
+2025-08-08 22:30:04,686 - INFO - Running 4 coarse iterations
+2025-08-08 22:30:04,787 - INFO - Coarse phase yielded 8 candidate states
+2025-08-08 22:30:04,939 - INFO - Baseline SEGC top-5 outcomes: [('0000000', 0.0782470703125), ('0110000', 0.0052490234375), ('1010000', 0.00439453125), ('1110000', 0.0040283203125), ('0100000', 0.003662109375)]
+2025-08-08 22:30:04,939 - INFO - Baseline SEGC Run 3: Target prob=0.0044, Coarse prob=0.1045, η=0.0086
+2025-08-08 22:30:04,939 - INFO - Starting QSVM-enhanced SEGC
+2025-08-08 22:30:04,939 - INFO - Running 4 coarse iterations
+2025-08-08 22:30:05,040 - INFO - Coarse phase yielded 8 candidate states
+2025-08-08 22:30:05,040 - INFO - Training QSVM on 8 samples
+2025-08-08 22:30:55,235 - INFO - Feedback 1/5: threshold=0.100, marked=2
+2025-08-08 22:30:55,845 - INFO - Feedback 1 top-5 coarse-subspace probs: [('0000000', 0.0716552734375), ('0110000', 0.004150390625), ('0010000', 0.0040283203125), ('1100000', 0.00390625), ('1110000', 0.0037841796875)]
+2025-08-08 22:30:59,558 - INFO - Feedback 2/5: threshold=0.213, marked=2
+2025-08-08 22:31:00,606 - INFO - Feedback 2 top-5 coarse-subspace probs: [('1110000', 0.00439453125), ('1000000', 0.0040283203125), ('0100000', 0.0037841796875), ('1010000', 0.003662109375), ('0010000', 0.0029296875)]
+2025-08-08 22:31:04,346 - INFO - Feedback 3/5: threshold=0.213, marked=2
+2025-08-08 22:31:05,800 - INFO - Feedback 3 top-5 coarse-subspace probs: [('0000000', 0.0704345703125), ('0100000', 0.003662109375), ('0010000', 0.003662109375), ('1010000', 0.003662109375), ('1110000', 0.00341796875)]
+2025-08-08 22:31:09,556 - INFO - Feedback 4/5: threshold=0.213, marked=2
+2025-08-08 22:31:11,412 - INFO - Feedback 4 top-5 coarse-subspace probs: [('0000000', 0.071533203125), ('0100000', 0.00439453125), ('1110000', 0.004150390625), ('1000000', 0.0037841796875), ('1100000', 0.0037841796875)]
+2025-08-08 22:31:15,163 - INFO - Feedback 5/5: threshold=0.213, marked=2
+2025-08-08 22:31:17,470 - INFO - Feedback 5 top-5 coarse-subspace probs: [('1000000', 0.0047607421875), ('0110000', 0.004638671875), ('1010000', 0.0037841796875), ('1110000', 0.003662109375), ('1100000', 0.0035400390625)]
+2025-08-08 22:31:17,470 - INFO - Running final fine-phase measurement
+2025-08-08 22:31:17,843 - INFO - QSVM-SEGC final top-10 outcomes: [('0000101', 2375), ('0000100', 2329), ('1110001', 43), ('0101010', 42), ('1010111', 42), ('0100000', 41), ('1101100', 40), ('0010011', 39), ('0111101', 38), ('0100010', 38)]
+2025-08-08 22:31:17,844 - INFO - QSVM-SEGC Run 3: Target prob=0.0027, Coarse prob=0.0259, η=0.0091
+2025-08-08 22:31:17,844 - INFO - Run 4/5
+2025-08-08 22:31:17,844 - INFO - Starting baseline SEGC
+2025-08-08 22:31:17,844 - INFO - Running 4 coarse iterations
+2025-08-08 22:31:17,944 - INFO - Coarse phase yielded 8 candidate states
+2025-08-08 22:31:18,101 - INFO - Baseline SEGC top-5 outcomes: [('0000000', 0.0714111328125), ('1010000', 0.0048828125), ('1000000', 0.00390625), ('1110000', 0.00390625), ('0010000', 0.00341796875)]
+2025-08-08 22:31:18,101 - INFO - Baseline SEGC Run 4: Target prob=0.0049, Coarse prob=0.0969, η=0.0096
+2025-08-08 22:31:18,102 - INFO - Starting QSVM-enhanced SEGC
+2025-08-08 22:31:18,102 - INFO - Running 4 coarse iterations
+2025-08-08 22:31:18,200 - INFO - Coarse phase yielded 8 candidate states
+2025-08-08 22:31:18,200 - INFO - Training QSVM on 8 samples
+2025-08-08 22:32:08,233 - INFO - Feedback 1/5: threshold=0.100, marked=0
+2025-08-08 22:32:08,233 - WARNING - No states marked above threshold – forcing target_state
+2025-08-08 22:32:08,727 - INFO - Feedback 1 top-5 coarse-subspace probs: [('0000000', 0.0054931640625), ('1000000', 0.004150390625), ('0110000', 0.0037841796875), ('1110000', 0.0037841796875), ('0100000', 0.0029296875)]
+2025-08-08 22:32:12,444 - INFO - Feedback 2/5: threshold=-0.056, marked=2
+2025-08-08 22:32:13,285 - INFO - Feedback 2 top-5 coarse-subspace probs: [('0000000', 0.01708984375), ('0010000', 0.0035400390625), ('1100000', 0.00341796875), ('1010000', 0.0030517578125), ('0110000', 0.0030517578125)]
+2025-08-08 22:32:17,031 - INFO - Feedback 3/5: threshold=-0.056, marked=2
+2025-08-08 22:32:18,313 - INFO - Feedback 3 top-5 coarse-subspace probs: [('0000000', 0.0396728515625), ('1000000', 0.0047607421875), ('1100000', 0.004638671875), ('0010000', 0.00439453125), ('0110000', 0.003173828125)]
+2025-08-08 22:32:22,269 - INFO - Feedback 4/5: threshold=-0.056, marked=2
+2025-08-08 22:32:24,093 - INFO - Feedback 4 top-5 coarse-subspace probs: [('1000000', 0.0042724609375), ('0010000', 0.004150390625), ('1110000', 0.004150390625), ('0000000', 0.00390625), ('0100000', 0.003662109375)]
+2025-08-08 22:32:27,960 - INFO - Feedback 5/5: threshold=-0.056, marked=2
+2025-08-08 22:32:30,083 - INFO - Feedback 5 top-5 coarse-subspace probs: [('0000000', 0.0184326171875), ('0100000', 0.0047607421875), ('1100000', 0.00439453125), ('1010000', 0.0040283203125), ('1110000', 0.0035400390625)]
+2025-08-08 22:32:30,083 - INFO - Running final fine-phase measurement
+2025-08-08 22:32:30,458 - INFO - QSVM-SEGC final top-10 outcomes: [('0000001', 3666), ('0000101', 161), ('0000100', 157), ('0000010', 156), ('0000011', 152), ('0000000', 146), ('0000110', 143), ('0000111', 141), ('0100111', 40), ('1101101', 40)]
+2025-08-08 22:32:30,458 - INFO - QSVM-SEGC Run 4: Target prob=0.0037, Coarse prob=0.0442, η=0.0124
+2025-08-08 22:32:30,458 - INFO - Run 5/5
+2025-08-08 22:32:30,458 - INFO - Starting baseline SEGC
+2025-08-08 22:32:30,458 - INFO - Running 4 coarse iterations
+2025-08-08 22:32:30,559 - INFO - Coarse phase yielded 8 candidate states
+2025-08-08 22:32:30,721 - INFO - Baseline SEGC top-5 outcomes: [('0000000', 0.075927734375), ('1010000', 0.0045166015625), ('1000000', 0.00439453125), ('0110000', 0.004150390625), ('0100000', 0.00390625)]
+2025-08-08 22:32:30,721 - INFO - Baseline SEGC Run 5: Target prob=0.0045, Coarse prob=0.1030, η=0.0088
+2025-08-08 22:32:30,721 - INFO - Starting QSVM-enhanced SEGC
+2025-08-08 22:32:30,722 - INFO - Running 4 coarse iterations
+2025-08-08 22:32:30,822 - INFO - Coarse phase yielded 8 candidate states
+2025-08-08 22:32:30,822 - INFO - Training QSVM on 8 samples
+2025-08-08 22:33:20,998 - INFO - Feedback 1/5: threshold=0.100, marked=1
+2025-08-08 22:33:21,471 - INFO - Feedback 1 top-5 coarse-subspace probs: [('1000000', 0.0045166015625), ('1110000', 0.00390625), ('0000000', 0.0037841796875), ('0010000', 0.0035400390625), ('1010000', 0.0035400390625)]
+2025-08-08 22:33:25,203 - INFO - Feedback 2/5: threshold=0.004, marked=2
+2025-08-08 22:33:26,073 - INFO - Feedback 2 top-5 coarse-subspace probs: [('0000000', 0.01708984375), ('0110000', 0.0042724609375), ('1110000', 0.00390625), ('0010000', 0.00341796875), ('1010000', 0.0030517578125)]
+2025-08-08 22:33:29,824 - INFO - Feedback 3/5: threshold=0.004, marked=2
+2025-08-08 22:33:31,089 - INFO - Feedback 3 top-5 coarse-subspace probs: [('0000000', 0.0404052734375), ('1100000', 0.0050048828125), ('0100000', 0.003662109375), ('0110000', 0.003662109375), ('1010000', 0.0035400390625)]
+2025-08-08 22:33:34,814 - INFO - Feedback 4/5: threshold=0.004, marked=2
+2025-08-08 22:33:36,521 - INFO - Feedback 4 top-5 coarse-subspace probs: [('1100000', 0.0037841796875), ('1010000', 0.003662109375), ('0010000', 0.0035400390625), ('0110000', 0.0035400390625), ('0100000', 0.003173828125)]
+2025-08-08 22:33:40,241 - INFO - Feedback 5/5: threshold=0.004, marked=2
+2025-08-08 22:33:42,382 - INFO - Feedback 5 top-5 coarse-subspace probs: [('0000000', 0.0184326171875), ('1010000', 0.004150390625), ('1000000', 0.003662109375), ('1100000', 0.0035400390625), ('0100000', 0.00341796875)]
+2025-08-08 22:33:42,382 - INFO - Running final fine-phase measurement
+2025-08-08 22:33:42,753 - INFO - QSVM-SEGC final top-10 outcomes: [('0000101', 3728), ('0000000', 162), ('0000010', 158), ('0000011', 146), ('0000111', 144), ('0000100', 140), ('0000110', 136), ('0000001', 135), ('0111111', 39), ('1000001', 38)]
+2025-08-08 22:33:42,754 - INFO - QSVM-SEGC Run 5: Target prob=0.0035, Coarse prob=0.0428, η=0.0120
+2025-08-08 22:33:42,756 - INFO - Statistical Analysis:
+2025-08-08 22:33:42,756 - INFO - Baseline SEGC: Mean target prob=0.0038, Std=0.0011
+2025-08-08 22:33:42,756 - INFO - QSVM-SEGC: Mean target prob=0.0033, Std=0.0004
+2025-08-08 22:33:42,756 - INFO - T-test: t=0.8474, p-value=0.4214
+2025-08-08 22:33:42,756 - INFO - Relative improvement: -12.82%
+2025-08-08 22:33:42,756 - INFO - Efficiency (η): Baseline=0.0075, QSVM-SEGC=0.0112
+2025-08-08 22:39:57,764 - INFO - Run 1/5
+2025-08-08 22:39:57,764 - INFO - Starting baseline SEGC
+2025-08-08 22:39:57,765 - INFO - Running 4 coarse iterations
+2025-08-08 22:39:57,860 - INFO - Coarse phase yielded 8 candidate states
+2025-08-08 22:39:58,022 - INFO - Baseline SEGC top-5 outcomes: [('0000000', 0.07177734375), ('0010000', 0.0048828125), ('1000000', 0.003662109375), ('0100000', 0.0035400390625), ('1100000', 0.003173828125)]
+2025-08-08 22:39:58,022 - INFO - Baseline SEGC Run 1: Target prob=0.0028, Coarse prob=0.0953, η=0.0055
+2025-08-08 22:39:58,022 - INFO - Starting QSVM-enhanced SEGC
+2025-08-08 22:39:58,022 - INFO - Running 4 coarse iterations
+2025-08-08 22:39:58,145 - INFO - Coarse phase yielded 8 candidate states
+2025-08-08 22:39:58,145 - INFO - Training QSVM on 8 samples
+2025-08-08 22:40:47,760 - INFO - Feedback 1/5: threshold=0.100, marked=3
+2025-08-08 22:40:48,518 - INFO - Feedback 1 top-5 coarse-subspace probs: [('0000000', 0.1119384765625), ('1100000', 0.0037841796875), ('0010000', 0.003662109375), ('1010000', 0.003662109375), ('1110000', 0.003662109375)]
+2025-08-08 22:40:52,242 - INFO - Feedback 2/5: threshold=0.170, marked=2
+2025-08-08 22:40:53,475 - INFO - Feedback 2 top-5 coarse-subspace probs: [('0000000', 0.02099609375), ('1110000', 0.00390625), ('1100000', 0.0037841796875), ('1010000', 0.0035400390625), ('0010000', 0.00341796875)]
+2025-08-08 22:40:57,201 - INFO - Feedback 3/5: threshold=0.170, marked=2
+2025-08-08 22:40:58,867 - INFO - Feedback 3 top-5 coarse-subspace probs: [('0000000', 0.0052490234375), ('0100000', 0.0042724609375), ('1000000', 0.004150390625), ('1010000', 0.0037841796875), ('0110000', 0.0037841796875)]
+2025-08-08 22:41:02,587 - INFO - Feedback 4/5: threshold=0.170, marked=2
+2025-08-08 22:41:04,646 - INFO - Feedback 4 top-5 coarse-subspace probs: [('0000000', 0.115966796875), ('1010000', 0.003662109375), ('0100000', 0.00341796875), ('1100000', 0.003173828125), ('0110000', 0.003173828125)]
+2025-08-08 22:41:08,421 - INFO - Feedback 5/5: threshold=0.170, marked=2
+2025-08-08 22:41:10,882 - INFO - Feedback 5 top-5 coarse-subspace probs: [('0000000', 0.02001953125), ('0100000', 0.0040283203125), ('1010000', 0.00390625), ('1000000', 0.003662109375), ('1110000', 0.003662109375)]
+2025-08-08 22:41:10,882 - INFO - Running final fine-phase measurement
+2025-08-08 22:41:11,248 - INFO - QSVM-SEGC final top-10 outcomes: [('0000100', 1391), ('0000101', 1332), ('0000110', 1302), ('0000000', 150), ('0000011', 149), ('0000111', 144), ('0000001', 142), ('0000010', 141), ('1011100', 41), ('0101011', 41)]
+2025-08-08 22:41:11,248 - INFO - QSVM-SEGC Run 1: Target prob=0.0029, Coarse prob=0.0454, η=0.0099
+2025-08-08 22:41:11,248 - INFO - Run 2/5
+2025-08-08 22:41:11,248 - INFO - Starting baseline SEGC
+2025-08-08 22:41:11,248 - INFO - Running 4 coarse iterations
+2025-08-08 22:41:11,350 - INFO - Coarse phase yielded 8 candidate states
+2025-08-08 22:41:11,498 - INFO - Baseline SEGC top-5 outcomes: [('0000000', 0.0687255859375), ('0100000', 0.0042724609375), ('1100000', 0.0042724609375), ('1110000', 0.00390625), ('1000000', 0.00341796875)]
+2025-08-08 22:41:11,498 - INFO - Baseline SEGC Run 2: Target prob=0.0031, Coarse prob=0.0940, η=0.0060
+2025-08-08 22:41:11,498 - INFO - Starting QSVM-enhanced SEGC
+2025-08-08 22:41:11,498 - INFO - Running 4 coarse iterations
+2025-08-08 22:41:11,600 - INFO - Coarse phase yielded 8 candidate states
+2025-08-08 22:41:11,600 - INFO - Training QSVM on 8 samples
+2025-08-08 22:42:01,570 - INFO - Feedback 1/5: threshold=0.100, marked=0
+2025-08-08 22:42:01,570 - WARNING - No states marked above threshold – forcing target_state
+2025-08-08 22:42:02,076 - INFO - Feedback 1 top-5 coarse-subspace probs: [('0000000', 0.0045166015625), ('0010000', 0.004150390625), ('0110000', 0.004150390625), ('1110000', 0.00390625), ('1100000', 0.003662109375)]
+2025-08-08 22:42:05,802 - INFO - Feedback 2/5: threshold=-0.080, marked=2
+2025-08-08 22:42:06,642 - INFO - Feedback 2 top-5 coarse-subspace probs: [('0000000', 0.015625), ('1010000', 0.00439453125), ('0100000', 0.004150390625), ('1000000', 0.0037841796875), ('0110000', 0.0035400390625)]
+2025-08-08 22:42:10,363 - INFO - Feedback 3/5: threshold=-0.080, marked=2
+2025-08-08 22:42:11,634 - INFO - Feedback 3 top-5 coarse-subspace probs: [('0000000', 0.0452880859375), ('1010000', 0.00439453125), ('1000000', 0.004150390625), ('0100000', 0.00390625), ('0010000', 0.0037841796875)]
+2025-08-08 22:42:15,361 - INFO - Feedback 4/5: threshold=-0.080, marked=2
+2025-08-08 22:42:17,070 - INFO - Feedback 4 top-5 coarse-subspace probs: [('0110000', 0.004638671875), ('1100000', 0.0042724609375), ('0000000', 0.00341796875), ('0010000', 0.003173828125), ('1010000', 0.0029296875)]
+2025-08-08 22:42:20,781 - INFO - Feedback 5/5: threshold=-0.080, marked=2
+2025-08-08 22:42:22,889 - INFO - Feedback 5 top-5 coarse-subspace probs: [('0000000', 0.0179443359375), ('1100000', 0.0050048828125), ('0010000', 0.0045166015625), ('1000000', 0.00390625), ('0100000', 0.0035400390625)]
+2025-08-08 22:42:22,889 - INFO - Running final fine-phase measurement
+2025-08-08 22:42:23,241 - INFO - QSVM-SEGC final top-10 outcomes: [('0000110', 3825), ('0000011', 147), ('0000001', 145), ('0000100', 142), ('0000000', 142), ('0000010', 138), ('0000101', 137), ('0000111', 129), ('0011111', 43), ('1001111', 41)]
+2025-08-08 22:42:23,241 - INFO - QSVM-SEGC Run 2: Target prob=0.0027, Coarse prob=0.0439, η=0.0091
+2025-08-08 22:42:23,242 - INFO - Run 3/5
+2025-08-08 22:42:23,242 - INFO - Starting baseline SEGC
+2025-08-08 22:42:23,242 - INFO - Running 4 coarse iterations
+2025-08-08 22:42:23,346 - INFO - Coarse phase yielded 8 candidate states
+2025-08-08 22:42:23,506 - INFO - Baseline SEGC top-5 outcomes: [('0000000', 0.0693359375), ('1000000', 0.0042724609375), ('0100000', 0.0042724609375), ('0110000', 0.0037841796875), ('1010000', 0.0035400390625)]
+2025-08-08 22:42:23,506 - INFO - Baseline SEGC Run 3: Target prob=0.0035, Coarse prob=0.0944, η=0.0069
+2025-08-08 22:42:23,506 - INFO - Starting QSVM-enhanced SEGC
+2025-08-08 22:42:23,506 - INFO - Running 4 coarse iterations
+2025-08-08 22:42:23,610 - INFO - Coarse phase yielded 8 candidate states
+2025-08-08 22:42:23,610 - INFO - Training QSVM on 8 samples
+2025-08-08 22:43:13,630 - INFO - Feedback 1/5: threshold=0.100, marked=0
+2025-08-08 22:43:13,631 - WARNING - No states marked above threshold – forcing target_state
+2025-08-08 22:43:14,103 - INFO - Feedback 1 top-5 coarse-subspace probs: [('1000000', 0.004150390625), ('1110000', 0.004150390625), ('0000000', 0.00390625), ('1010000', 0.00390625), ('1100000', 0.00341796875)]
+2025-08-08 22:43:17,823 - INFO - Feedback 2/5: threshold=-0.080, marked=2
+2025-08-08 22:43:18,688 - INFO - Feedback 2 top-5 coarse-subspace probs: [('0000000', 0.017333984375), ('1110000', 0.0045166015625), ('1100000', 0.0042724609375), ('1000000', 0.004150390625), ('1010000', 0.004150390625)]
+2025-08-08 22:43:22,403 - INFO - Feedback 3/5: threshold=-0.080, marked=2
+2025-08-08 22:43:23,661 - INFO - Feedback 3 top-5 coarse-subspace probs: [('0000000', 0.0418701171875), ('1100000', 0.004638671875), ('1110000', 0.0040283203125), ('1000000', 0.0037841796875), ('0100000', 0.003662109375)]
+2025-08-08 22:43:27,405 - INFO - Feedback 4/5: threshold=-0.080, marked=2
+2025-08-08 22:43:29,058 - INFO - Feedback 4 top-5 coarse-subspace probs: [('0000000', 0.0059814453125), ('0110000', 0.0042724609375), ('1000000', 0.0037841796875), ('1100000', 0.0035400390625), ('0010000', 0.0035400390625)]
+2025-08-08 22:43:32,938 - INFO - Feedback 5/5: threshold=-0.080, marked=2
+2025-08-08 22:43:35,024 - INFO - Feedback 5 top-5 coarse-subspace probs: [('0000000', 0.0162353515625), ('1110000', 0.0052490234375), ('1000000', 0.003662109375), ('1100000', 0.003662109375), ('0100000', 0.00341796875)]
+2025-08-08 22:43:35,025 - INFO - Running final fine-phase measurement
+2025-08-08 22:43:35,377 - INFO - QSVM-SEGC final top-10 outcomes: [('0000111', 3661), ('0000101', 176), ('0000100', 173), ('0000010', 155), ('0000110', 153), ('0000000', 148), ('0000011', 141), ('0000001', 138), ('0010001', 45), ('0001001', 42)]
+2025-08-08 22:43:35,377 - INFO - QSVM-SEGC Run 3: Target prob=0.0037, Coarse prob=0.0414, η=0.0124
+2025-08-08 22:43:35,377 - INFO - Run 4/5
+2025-08-08 22:43:35,377 - INFO - Starting baseline SEGC
+2025-08-08 22:43:35,377 - INFO - Running 4 coarse iterations
+2025-08-08 22:43:35,508 - INFO - Coarse phase yielded 8 candidate states
+2025-08-08 22:43:35,675 - INFO - Baseline SEGC top-5 outcomes: [('0000000', 0.0767822265625), ('0110000', 0.00390625), ('0010000', 0.0035400390625), ('1000000', 0.00341796875), ('1110000', 0.00341796875)]
+2025-08-08 22:43:35,676 - INFO - Baseline SEGC Run 4: Target prob=0.0026, Coarse prob=0.0992, η=0.0050
+2025-08-08 22:43:35,676 - INFO - Starting QSVM-enhanced SEGC
+2025-08-08 22:43:35,676 - INFO - Running 4 coarse iterations
+2025-08-08 22:43:35,777 - INFO - Coarse phase yielded 8 candidate states
+2025-08-08 22:43:35,777 - INFO - Training QSVM on 8 samples
+2025-08-08 22:44:25,728 - INFO - Feedback 1/5: threshold=0.100, marked=4
+2025-08-08 22:44:26,657 - INFO - Feedback 1 top-5 coarse-subspace probs: [('0000000', 0.0728759765625), ('0010000', 0.004150390625), ('1000000', 0.00390625), ('0110000', 0.003662109375), ('1100000', 0.0035400390625)]
+2025-08-08 22:44:30,385 - INFO - Feedback 2/5: threshold=0.131, marked=2
+2025-08-08 22:44:31,805 - INFO - Feedback 2 top-5 coarse-subspace probs: [('0000000', 0.073486328125), ('0010000', 0.0037841796875), ('0100000', 0.0035400390625), ('1000000', 0.003173828125), ('1100000', 0.003173828125)]
+2025-08-08 22:44:35,541 - INFO - Feedback 3/5: threshold=0.131, marked=2
+2025-08-08 22:44:37,385 - INFO - Feedback 3 top-5 coarse-subspace probs: [('1100000', 0.0045166015625), ('1000000', 0.0040283203125), ('0100000', 0.003662109375), ('0010000', 0.003662109375), ('1010000', 0.0032958984375)]
+2025-08-08 22:44:41,120 - INFO - Feedback 4/5: threshold=0.131, marked=2
+2025-08-08 22:44:43,381 - INFO - Feedback 4 top-5 coarse-subspace probs: [('0000000', 0.0697021484375), ('0010000', 0.00439453125), ('1010000', 0.0035400390625), ('0110000', 0.0035400390625), ('1000000', 0.00341796875)]
+2025-08-08 22:44:47,149 - INFO - Feedback 5/5: threshold=0.131, marked=2
+2025-08-08 22:44:49,804 - INFO - Feedback 5 top-5 coarse-subspace probs: [('0000000', 0.07275390625), ('1110000', 0.0057373046875), ('1000000', 0.0045166015625), ('1100000', 0.004150390625), ('0010000', 0.004150390625)]
+2025-08-08 22:44:49,804 - INFO - Running final fine-phase measurement
+2025-08-08 22:44:50,187 - INFO - QSVM-SEGC final top-10 outcomes: [('0000001', 604), ('0000011', 594), ('0000110', 587), ('0000000', 586), ('0000010', 585), ('0000100', 585), ('0000111', 573), ('0000101', 534), ('1001110', 45), ('0001110', 43)]
+2025-08-08 22:44:50,188 - INFO - QSVM-SEGC Run 4: Target prob=0.0038, Coarse prob=0.1000, η=0.0128
+2025-08-08 22:44:50,188 - INFO - Run 5/5
+2025-08-08 22:44:50,188 - INFO - Starting baseline SEGC
+2025-08-08 22:44:50,188 - INFO - Running 4 coarse iterations
+2025-08-08 22:44:50,289 - INFO - Coarse phase yielded 8 candidate states
+2025-08-08 22:44:50,448 - INFO - Baseline SEGC top-5 outcomes: [('0000000', 0.070068359375), ('0110000', 0.004150390625), ('1010000', 0.0037841796875), ('0010000', 0.0035400390625), ('1110000', 0.0035400390625)]
+2025-08-08 22:44:50,448 - INFO - Baseline SEGC Run 5: Target prob=0.0038, Coarse prob=0.0950, η=0.0074
+2025-08-08 22:44:50,448 - INFO - Starting QSVM-enhanced SEGC
+2025-08-08 22:44:50,448 - INFO - Running 4 coarse iterations
+2025-08-08 22:44:50,548 - INFO - Coarse phase yielded 8 candidate states
+2025-08-08 22:44:50,548 - INFO - Training QSVM on 8 samples
+2025-08-08 22:45:40,479 - INFO - Feedback 1/5: threshold=0.100, marked=0
+2025-08-08 22:45:40,479 - WARNING - No states marked above threshold – forcing target_state
+2025-08-08 22:45:40,981 - INFO - Feedback 1 top-5 coarse-subspace probs: [('0000000', 0.0048828125), ('1010000', 0.0042724609375), ('1110000', 0.0042724609375), ('1100000', 0.0037841796875), ('0010000', 0.0037841796875)]
+2025-08-08 22:45:44,697 - INFO - Feedback 2/5: threshold=-0.036, marked=2
+2025-08-08 22:45:45,568 - INFO - Feedback 2 top-5 coarse-subspace probs: [('0000000', 0.017822265625), ('1010000', 0.004638671875), ('0110000', 0.003662109375), ('1000000', 0.0035400390625), ('0010000', 0.0032958984375)]
+2025-08-08 22:45:49,296 - INFO - Feedback 3/5: threshold=-0.036, marked=2
+2025-08-08 22:45:50,568 - INFO - Feedback 3 top-5 coarse-subspace probs: [('0000000', 0.040283203125), ('0100000', 0.0048828125), ('0110000', 0.0042724609375), ('1110000', 0.0037841796875), ('1000000', 0.0035400390625)]
+2025-08-08 22:45:54,315 - INFO - Feedback 4/5: threshold=-0.036, marked=2
+2025-08-08 22:45:56,019 - INFO - Feedback 4 top-5 coarse-subspace probs: [('0110000', 0.0042724609375), ('0000000', 0.00390625), ('1100000', 0.00390625), ('1000000', 0.0037841796875), ('1110000', 0.0037841796875)]
+2025-08-08 22:45:59,739 - INFO - Feedback 5/5: threshold=-0.036, marked=2
+2025-08-08 22:46:01,843 - INFO - Feedback 5 top-5 coarse-subspace probs: [('0000000', 0.0181884765625), ('1100000', 0.004638671875), ('0100000', 0.003662109375), ('0110000', 0.0035400390625), ('1010000', 0.0032958984375)]
+2025-08-08 22:46:01,843 - INFO - Running final fine-phase measurement
+2025-08-08 22:46:02,214 - INFO - QSVM-SEGC final top-10 outcomes: [('0000100', 3719), ('0000000', 164), ('0000010', 156), ('0000001', 150), ('0000110', 148), ('0000111', 136), ('0000011', 133), ('0000101', 124), ('0110110', 43), ('0110111', 42)]
+2025-08-08 22:46:02,214 - INFO - QSVM-SEGC Run 5: Target prob=0.0035, Coarse prob=0.0426, η=0.0120
+2025-08-08 22:46:02,217 - INFO - Statistical Analysis:
+2025-08-08 22:46:02,217 - INFO - Baseline SEGC: Mean target prob=0.0031, Std=0.0005
+2025-08-08 22:46:02,217 - INFO - QSVM-SEGC: Mean target prob=0.0033, Std=0.0004
+2025-08-08 22:46:02,217 - INFO - T-test: t=-0.5458, p-value=0.6001
+2025-08-08 22:46:02,217 - INFO - Relative improvement: 5.43%
+2025-08-08 22:46:02,217 - INFO - Efficiency (η): Baseline=0.0062, QSVM-SEGC=0.0112
+2025-08-08 22:46:02,217 - INFO - Coarse subspace variance: Baseline=0.000777, QSVM-SEGC=778575.570000
+2025-08-08 22:46:02,217 - INFO - Simulating NISQ noise effects
+2025-08-08 22:46:02,849 - INFO - Noisy target prob (depolarizing noise 0.01): 0.0000
+2025-08-08 22:46:02,849 - INFO - Causal Analysis:
+2025-08-08 22:46:02,849 - INFO - 1. QSVM Feedback: Ineffective due to poor feature differentiation in binary state encoding, leading to low or negative thresholds.
+2025-08-08 22:46:02,849 - INFO - 2. Coarse Overshoot: Oracle amplifies non-target state (0000000) due to uniform coarse subspace amplification.
+2025-08-08 22:46:02,849 - INFO - 3. Low η: Target probability diluted by coarse subspace size (N_c=16) and ineffective fine-phase amplification.
+2025-08-08 22:46:02,849 - INFO - 4. Computational Cost: QSVM kernel computation (10,000 entries) dominates runtime, limiting scalability.
+2025-08-08 22:46:02,849 - INFO - Objective Evaluation:
+2025-08-08 22:46:02,849 - INFO - 1. Amplify target state probability efficiently: QSVM-SEGC mean target prob 0.0033 vs. Baseline 0.0031, limited by coarse overshoot and QSVM feedback.
+2025-08-08 22:46:02,849 - INFO - 2. Reduce dispersion in coarse subspace: QSVM-SEGC variance 778575.570000 vs. Baseline 0.000777, slight improvement in target stability.
+2025-08-08 22:46:02,850 - INFO - 3. Integrate QSVM to improve state selection: QSVM fails to mark relevant states consistently, undermining state selection.
+2025-08-08 22:46:02,850 - INFO - 4. Compare against Grover's optimal bound: QSVM-SEGC η=0.0112 vs. Baseline η=0.0062, both far from Grover's bound (~0.3).
+2025-08-08 22:56:45,098 - INFO - Run 1/30 for k=1
+2025-08-08 22:56:45,099 - INFO - Starting baseline SEGC
+2025-08-08 22:56:45,099 - INFO - Running 2 coarse iterations
+2025-08-08 22:56:45,202 - INFO - Coarse phase yielded 16 candidate states
+2025-08-08 22:56:45,255 - INFO - Baseline SEGC top-5 outcomes: [('0100000', 0.00357), ('0000000', 0.00339), ('1110000', 0.00328), ('1000000', 0.00318), ('0010000', 0.00316)]
+2025-08-08 22:58:30,607 - INFO - Run 1/30 for k=1
+2025-08-08 22:58:30,607 - INFO - Starting baseline SEGC
+2025-08-08 22:58:30,607 - INFO - Running 2 coarse iterations
+2025-08-08 22:58:30,712 - INFO - Coarse phase yielded 16 candidate states
+2025-08-08 22:58:30,765 - INFO - Baseline SEGC top-5 outcomes: [('1100000', 0.00336), ('1110000', 0.00336), ('0000000', 0.00332), ('0010000', 0.00327), ('0110000', 0.00326)]
+2025-08-08 23:13:16,747 - INFO - Run 1/30 for k=1
+2025-08-08 23:13:16,747 - INFO - Starting baseline SEGC
+2025-08-08 23:13:16,748 - DEBUG - SEGC config: k_c=2, k_f=3
+2025-08-08 23:13:16,748 - INFO - Running 2 coarse iterations
+2025-08-08 23:13:16,849 - INFO - Coarse phase yielded 16 candidate states
+2025-08-08 23:13:16,850 - DEBUG - Running 3 fine iterations
+2025-08-08 23:17:28,920 - INFO - Run 1/30 for k=1
+2025-08-08 23:17:28,920 - INFO - Starting baseline SEGC
+2025-08-08 23:17:28,920 - DEBUG - SEGC config: k_c=2, k_f=3
+2025-08-08 23:17:28,920 - INFO - Running 2 coarse iterations
+2025-08-08 23:17:29,024 - INFO - Coarse phase yielded 16 candidate states
+2025-08-08 23:17:29,024 - DEBUG - Running 3 fine iterations
+2025-08-08 23:19:34,437 - INFO - Run 1/30 for k=1
+2025-08-08 23:19:34,437 - INFO - Starting baseline SEGC
+2025-08-08 23:19:34,437 - DEBUG - SEGC init: n_qubits=7, coarse_mask=****0000, target=1010000, k_c=2, k_f=3
+2025-08-08 23:19:34,437 - DEBUG - SEGC config: k_c=2, k_f=3
+2025-08-08 23:19:34,438 - DEBUG - Initialized uniform superposition
+2025-08-08 23:19:34,438 - INFO - Running 2 coarse iterations
+2025-08-08 23:19:34,438 - DEBUG - Applied coarse oracle
+2025-08-08 23:19:34,438 - DEBUG - Applied coarse diffuser
+2025-08-08 23:19:34,439 - DEBUG - Applied coarse oracle
+2025-08-08 23:19:34,439 - DEBUG - Applied coarse diffuser
+2025-08-08 23:19:34,439 - INFO - Completed 2 coarse iterations
+2025-08-08 23:19:34,545 - DEBUG - Coarse states: ['0000000', '0000000', '0000001', '0000001', '0000010']...
+2025-08-08 23:19:34,545 - INFO - Coarse phase yielded 16 candidate states
+2025-08-08 23:19:34,546 - DEBUG - Applied fine oracle for states: ['0000101']
+2025-08-08 23:19:34,546 - DEBUG - Running 3 fine iterations
+2025-08-08 23:19:34,546 - DEBUG - Starting 3 fine iterations
+2025-08-08 23:19:34,546 - DEBUG - Fine iteration 1/3
+2025-08-08 23:19:34,546 - DEBUG - Applied fine oracle for states: ['0000101']
+2025-08-08 23:19:34,546 - DEBUG - Coarse indices for diffuser: [0, 1, 2, 3]
+2025-08-08 23:19:34,546 - DEBUG - Applied partial diffuser
+2025-08-08 23:19:34,546 - DEBUG - Fine iteration 2/3
+2025-08-08 23:19:34,546 - DEBUG - Applied fine oracle for states: ['0000101']
+2025-08-08 23:19:34,546 - DEBUG - Coarse indices for diffuser: [0, 1, 2, 3]
+2025-08-08 23:19:34,546 - DEBUG - Applied partial diffuser
+2025-08-08 23:19:34,546 - DEBUG - Fine iteration 3/3
+2025-08-08 23:19:34,547 - DEBUG - Applied fine oracle for states: ['0000101']
+2025-08-08 23:19:34,547 - DEBUG - Coarse indices for diffuser: [0, 1, 2, 3]
+2025-08-08 23:19:34,547 - DEBUG - Applied partial diffuser
+2025-08-08 23:19:34,547 - INFO - Completed 3 fine iterations
+2025-08-08 23:19:34,715 - DEBUG - Post-fine statevector probs: [('0100000', 0.023301694542166504), ('0000000', 0.00015655532479284405), ('1110000', 0.00015655532479284402), ('0010000', 0.0001565553247928416), ('0110000', 0.00015655532479284158)]
+2025-08-08 23:19:34,770 - DEBUG - Measurement counts (top 5): [('1110000', 5029), ('1110110', 5019), ('1111100', 4991), ('1110011', 4984), ('1111010', 4977)]
+2025-08-08 23:19:34,770 - INFO - Baseline SEGC top-5 outcomes: [('1010000', 0.04602), ('0100000', 0.00039), ('0010000', 0.00031), ('0000000', 0.00029), ('1100000', 0.00029)]
+2025-08-08 23:19:34,770 - INFO - Baseline SEGC Run 1: Target prob=0.0460, Coarse prob=0.0481, η=0.0673
+2025-08-08 23:19:34,770 - INFO - Starting QSVM-enhanced SEGC with k=1
+2025-08-08 23:19:34,771 - DEBUG - SEGC init: n_qubits=7, coarse_mask=****0000, target=1010000, k_c=2, k_f=3
+2025-08-08 23:19:34,771 - DEBUG - SEGC config: k_c=2, k_f=3
+2025-08-08 23:19:34,771 - DEBUG - Initialized uniform superposition
+2025-08-08 23:19:34,771 - INFO - Running 2 coarse iterations
+2025-08-08 23:19:34,771 - DEBUG - Applied coarse oracle
+2025-08-08 23:19:34,771 - DEBUG - Applied coarse diffuser
+2025-08-08 23:19:34,772 - DEBUG - Applied coarse oracle
+2025-08-08 23:19:34,772 - DEBUG - Applied coarse diffuser
+2025-08-08 23:19:34,772 - INFO - Completed 2 coarse iterations
+2025-08-08 23:19:34,882 - DEBUG - Coarse states: ['0000000', '0000000', '0000001', '0000001', '0000010']...
+2025-08-08 23:19:34,882 - INFO - Coarse phase yielded 16 candidate states
+2025-08-08 23:19:34,882 - DEBUG - QSVM init: feature_map_type=statevector, feature_dim=7
+2025-08-08 23:19:34,882 - INFO - Training QSVM on 16 samples
+2025-08-08 23:20:24,323 - INFO - Run 1/30 for k=1
+2025-08-08 23:20:24,323 - INFO - Starting baseline SEGC
+2025-08-08 23:20:24,324 - DEBUG - SEGC init: n_qubits=7, coarse_mask=****0000, target=1010000, k_c=2, k_f=3
+2025-08-08 23:20:24,324 - DEBUG - SEGC config: k_c=2, k_f=3
+2025-08-08 23:20:24,324 - DEBUG - Initialized uniform superposition
+2025-08-08 23:20:24,324 - INFO - Running 2 coarse iterations
+2025-08-08 23:20:24,324 - DEBUG - Applied coarse oracle
+2025-08-08 23:20:24,324 - DEBUG - Applied coarse diffuser
+2025-08-08 23:20:24,325 - DEBUG - Applied coarse oracle
+2025-08-08 23:20:24,325 - DEBUG - Applied coarse diffuser
+2025-08-08 23:20:24,325 - INFO - Completed 2 coarse iterations
+2025-08-08 23:20:24,427 - DEBUG - Coarse states: ['0000000', '0000000', '0000001', '0000001', '0000010']...
+2025-08-08 23:20:24,427 - INFO - Coarse phase yielded 16 candidate states
+2025-08-08 23:20:24,427 - DEBUG - Applied fine oracle for states: ['0000101']
+2025-08-08 23:20:24,427 - DEBUG - Running 3 fine iterations
+2025-08-08 23:20:24,427 - DEBUG - Starting 3 fine iterations
+2025-08-08 23:20:24,428 - DEBUG - Fine iteration 1/3
+2025-08-08 23:20:24,428 - DEBUG - Applied fine oracle for states: ['0000101']
+2025-08-08 23:20:24,428 - DEBUG - Coarse indices for diffuser: [0, 1, 2, 3]
+2025-08-08 23:20:24,428 - DEBUG - Applied partial diffuser
+2025-08-08 23:20:24,428 - DEBUG - Fine iteration 2/3
+2025-08-08 23:20:24,428 - DEBUG - Applied fine oracle for states: ['0000101']
+2025-08-08 23:20:24,428 - DEBUG - Coarse indices for diffuser: [0, 1, 2, 3]
+2025-08-08 23:20:24,428 - DEBUG - Applied partial diffuser
+2025-08-08 23:20:24,428 - DEBUG - Fine iteration 3/3
+2025-08-08 23:20:24,428 - DEBUG - Applied fine oracle for states: ['0000101']
+2025-08-08 23:20:24,428 - DEBUG - Coarse indices for diffuser: [0, 1, 2, 3]
+2025-08-08 23:20:24,428 - DEBUG - Applied partial diffuser
+2025-08-08 23:20:24,429 - INFO - Completed 3 fine iterations
+2025-08-08 23:20:24,591 - DEBUG - Post-fine statevector probs: [('0100000', 0.023301694542166504), ('0000000', 0.00015655532479284405), ('1110000', 0.00015655532479284402), ('0010000', 0.0001565553247928416), ('0110000', 0.00015655532479284158)]
+2025-08-08 23:20:24,648 - DEBUG - Measurement counts (top 5): [('1111010', 5092), ('1111111', 5067), ('1111001', 5041), ('1110001', 5002), ('1111100', 4983)]
+2025-08-08 23:20:24,648 - INFO - Baseline SEGC top-5 outcomes: [('1010000', 0.0467), ('1110000', 0.00037), ('1100000', 0.00034), ('0010000', 0.00034), ('0100000', 0.00031)]
+2025-08-08 23:20:24,648 - INFO - Baseline SEGC Run 1: Target prob=0.0467, Coarse prob=0.0489, η=0.0683
+2025-08-08 23:20:24,648 - INFO - Starting QSVM-enhanced SEGC with k=1
+2025-08-08 23:20:24,648 - DEBUG - SEGC init: n_qubits=7, coarse_mask=****0000, target=1010000, k_c=2, k_f=3
+2025-08-08 23:20:24,648 - DEBUG - SEGC config: k_c=2, k_f=3
+2025-08-08 23:20:24,648 - DEBUG - Initialized uniform superposition
+2025-08-08 23:20:24,648 - INFO - Running 2 coarse iterations
+2025-08-08 23:20:24,649 - DEBUG - Applied coarse oracle
+2025-08-08 23:20:24,649 - DEBUG - Applied coarse diffuser
+2025-08-08 23:20:24,649 - DEBUG - Applied coarse oracle
+2025-08-08 23:20:24,649 - DEBUG - Applied coarse diffuser
+2025-08-08 23:20:24,649 - INFO - Completed 2 coarse iterations
+2025-08-08 23:20:24,760 - DEBUG - Coarse states: ['0000000', '0000000', '0000001', '0000001', '0000010']...
+2025-08-08 23:20:24,760 - INFO - Coarse phase yielded 16 candidate states
+2025-08-08 23:20:24,760 - DEBUG - QSVM init: feature_map_type=statevector, feature_dim=7
+2025-08-08 23:20:24,760 - INFO - Training QSVM on 16 samples
+2025-08-09 06:39:22,741 - INFO - Run 1/30 for k=1
+2025-08-09 06:39:22,741 - INFO - Starting baseline SEGC
+2025-08-09 06:39:22,742 - INFO - Auto-set iterations: coarse=2, fine=3 (Nc=16)
+2025-08-09 06:39:22,742 - DEBUG - SEGC init: n_qubits=7, coarse_mask=****0000, target=1010000, k_c=2, k_f=3
+2025-08-09 06:39:22,742 - DEBUG - SEGC config: k_c=2, k_f=3
+2025-08-09 06:39:22,742 - DEBUG - Initialized uniform superposition
+2025-08-09 06:39:22,742 - INFO - Running 2 coarse iterations
+2025-08-09 06:39:22,742 - DEBUG - Applied coarse oracle
+2025-08-09 06:39:22,742 - DEBUG - Applied coarse diffuser
+2025-08-09 06:39:22,743 - DEBUG - Applied coarse oracle
+2025-08-09 06:39:22,743 - DEBUG - Applied coarse diffuser
+2025-08-09 06:39:22,743 - INFO - Completed 2 coarse iterations
+2025-08-09 06:39:22,845 - DEBUG - Coarse states: ['0000000', '0000000', '0000001', '0000001', '0000010']...
+2025-08-09 06:39:22,845 - INFO - Coarse phase yielded 16 candidate states
+2025-08-09 06:39:22,845 - DEBUG - Applied fine oracle for states: ['0000101']
+2025-08-09 06:39:22,845 - DEBUG - Running 3 fine iterations
+2025-08-09 06:39:22,845 - DEBUG - Starting 3 fine iterations
+2025-08-09 06:39:22,845 - DEBUG - Fine iteration 1/3
+2025-08-09 06:39:22,845 - DEBUG - Applied fine oracle for states: ['0000101']
+2025-08-09 06:39:22,845 - DEBUG - Coarse indices for diffuser: [0, 1, 2, 3]
+2025-08-09 06:39:22,845 - DEBUG - Applied partial diffuser
+2025-08-09 06:39:22,845 - DEBUG - Fine iteration 2/3
+2025-08-09 06:39:22,846 - DEBUG - Applied fine oracle for states: ['0000101']
+2025-08-09 06:39:22,846 - DEBUG - Coarse indices for diffuser: [0, 1, 2, 3]
+2025-08-09 06:39:22,846 - DEBUG - Applied partial diffuser
+2025-08-09 06:39:22,846 - DEBUG - Fine iteration 3/3
+2025-08-09 06:39:22,846 - DEBUG - Applied fine oracle for states: ['0000101']
+2025-08-09 06:39:22,846 - DEBUG - Coarse indices for diffuser: [0, 1, 2, 3]
+2025-08-09 06:39:22,846 - DEBUG - Applied partial diffuser
+2025-08-09 06:39:22,846 - INFO - Completed 3 fine iterations
+2025-08-09 06:39:23,007 - DEBUG - Post-fine statevector probs: [('0100000', 0.023301694542166504), ('0000000', 0.00015655532479284405), ('1110000', 0.00015655532479284402), ('0010000', 0.0001565553247928416), ('0110000', 0.00015655532479284158)]
+2025-08-09 06:39:23,061 - DEBUG - Measurement counts (top 5): [('1111010', 5064), ('1110110', 5009), ('1111111', 5000), ('1110101', 4992), ('1110010', 4981)]
+2025-08-09 06:39:23,061 - INFO - Baseline SEGC top-5 outcomes: [('1010000', 0.04673), ('0000000', 0.00034), ('1100000', 0.00034), ('0110000', 0.00033), ('0100000', 0.0003)]
+2025-08-09 06:39:23,061 - INFO - Baseline SEGC Run 1: Target prob=0.0467, Coarse prob=0.0488, η=0.0683
+2025-08-09 06:39:23,061 - INFO - Starting QSVM-enhanced SEGC with k=1
+2025-08-09 06:39:23,061 - INFO - Auto-set iterations: coarse=2, fine=3 (Nc=16)
+2025-08-09 06:39:23,061 - DEBUG - SEGC init: n_qubits=7, coarse_mask=****0000, target=1010000, k_c=2, k_f=3
+2025-08-09 06:39:23,061 - DEBUG - SEGC config: k_c=2, k_f=3
+2025-08-09 06:39:23,061 - DEBUG - Initialized uniform superposition
+2025-08-09 06:39:23,061 - INFO - Running 2 coarse iterations
+2025-08-09 06:39:23,062 - DEBUG - Applied coarse oracle
+2025-08-09 06:39:23,062 - DEBUG - Applied coarse diffuser
+2025-08-09 06:39:23,062 - DEBUG - Applied coarse oracle
+2025-08-09 06:39:23,063 - DEBUG - Applied coarse diffuser
+2025-08-09 06:39:23,063 - INFO - Completed 2 coarse iterations
+2025-08-09 06:39:23,173 - DEBUG - Coarse states: ['0000000', '0000000', '0000001', '0000001', '0000010']...
+2025-08-09 06:39:23,173 - INFO - Coarse phase yielded 16 candidate states
+2025-08-09 06:39:23,173 - DEBUG - QSVM init: feature_map_type=statevector, feature_dim=7
+2025-08-09 06:39:23,173 - INFO - Training QSVM on 16 samples
+2025-08-09 06:39:29,160 - INFO - Run 1/30 for k=1
+2025-08-09 06:39:29,160 - INFO - Starting baseline SEGC
+2025-08-09 06:39:29,160 - INFO - Auto-set iterations: coarse=2, fine=3 (Nc=16)
+2025-08-09 06:39:29,160 - DEBUG - SEGC init: n_qubits=7, coarse_mask=****0000, target=1010000, k_c=2, k_f=3
+2025-08-09 06:39:29,160 - DEBUG - SEGC config: k_c=2, k_f=3
+2025-08-09 06:39:29,160 - DEBUG - Initialized uniform superposition
+2025-08-09 06:39:29,160 - INFO - Running 2 coarse iterations
+2025-08-09 06:39:29,160 - DEBUG - Applied coarse oracle
+2025-08-09 06:39:29,161 - DEBUG - Applied coarse diffuser
+2025-08-09 06:39:29,161 - DEBUG - Applied coarse oracle
+2025-08-09 06:39:29,161 - DEBUG - Applied coarse diffuser
+2025-08-09 06:39:29,161 - INFO - Completed 2 coarse iterations
+2025-08-09 06:39:29,263 - DEBUG - Coarse states: ['0000000', '0000000', '0000001', '0000001', '0000010']...
+2025-08-09 06:39:29,263 - INFO - Coarse phase yielded 16 candidate states
+2025-08-09 06:39:29,263 - DEBUG - Applied fine oracle for states: ['0000101']
+2025-08-09 06:39:29,263 - DEBUG - Running 3 fine iterations
+2025-08-09 06:39:29,263 - DEBUG - Starting 3 fine iterations
+2025-08-09 06:39:29,263 - DEBUG - Fine iteration 1/3
+2025-08-09 06:39:29,263 - DEBUG - Applied fine oracle for states: ['0000101']
+2025-08-09 06:39:29,263 - DEBUG - Coarse indices for diffuser: [0, 1, 2, 3]
+2025-08-09 06:39:29,263 - DEBUG - Applied partial diffuser
+2025-08-09 06:39:29,264 - DEBUG - Fine iteration 2/3
+2025-08-09 06:39:29,264 - DEBUG - Applied fine oracle for states: ['0000101']
+2025-08-09 06:39:29,264 - DEBUG - Coarse indices for diffuser: [0, 1, 2, 3]
+2025-08-09 06:39:29,264 - DEBUG - Applied partial diffuser
+2025-08-09 06:39:29,264 - DEBUG - Fine iteration 3/3
+2025-08-09 06:39:29,264 - DEBUG - Applied fine oracle for states: ['0000101']
+2025-08-09 06:39:29,264 - DEBUG - Coarse indices for diffuser: [0, 1, 2, 3]
+2025-08-09 06:39:29,264 - DEBUG - Applied partial diffuser
+2025-08-09 06:39:29,264 - INFO - Completed 3 fine iterations
+2025-08-09 06:39:29,424 - DEBUG - Post-fine statevector probs: [('0100000', 0.023301694542166504), ('0000000', 0.00015655532479284405), ('1110000', 0.00015655532479284402), ('0010000', 0.0001565553247928416), ('0110000', 0.00015655532479284158)]
+2025-08-09 06:39:29,475 - DEBUG - Measurement counts (top 5): [('1110011', 5103), ('1110110', 5061), ('1111010', 5049), ('1111100', 5020), ('1110000', 5015)]
+2025-08-09 06:39:29,475 - INFO - Baseline SEGC top-5 outcomes: [('1010000', 0.04543), ('1110000', 0.00042), ('1100000', 0.00035), ('1000000', 0.00029), ('0100000', 0.00027)]
+2025-08-09 06:39:29,475 - INFO - Baseline SEGC Run 1: Target prob=0.0454, Coarse prob=0.0474, η=0.0664
+2025-08-09 06:39:29,475 - INFO - Starting QSVM-enhanced SEGC with k=1
+2025-08-09 06:39:29,475 - INFO - Auto-set iterations: coarse=2, fine=3 (Nc=16)
+2025-08-09 06:39:29,475 - DEBUG - SEGC init: n_qubits=7, coarse_mask=****0000, target=1010000, k_c=2, k_f=3
+2025-08-09 06:39:29,475 - DEBUG - SEGC config: k_c=2, k_f=3
+2025-08-09 06:39:29,476 - DEBUG - Initialized uniform superposition
+2025-08-09 06:39:29,476 - INFO - Running 2 coarse iterations
+2025-08-09 06:39:29,476 - DEBUG - Applied coarse oracle
+2025-08-09 06:39:29,476 - DEBUG - Applied coarse diffuser
+2025-08-09 06:39:29,477 - DEBUG - Applied coarse oracle
+2025-08-09 06:39:29,477 - DEBUG - Applied coarse diffuser
+2025-08-09 06:39:29,477 - INFO - Completed 2 coarse iterations
+2025-08-09 06:39:29,588 - DEBUG - Coarse states: ['0000000', '0000000', '0000001', '0000001', '0000010']...
+2025-08-09 06:39:29,588 - INFO - Coarse phase yielded 16 candidate states
+2025-08-09 06:39:29,588 - DEBUG - QSVM init: feature_map_type=statevector, feature_dim=7
+2025-08-09 06:39:29,588 - INFO - Training QSVM on 16 samples
+2025-08-09 06:44:38,145 - INFO - Run 1/30 for k=1
+2025-08-09 06:44:38,145 - INFO - Starting baseline SEGC
+2025-08-09 06:44:38,145 - INFO - Auto-set iterations: coarse=2, fine=3 (Nc=16)
+2025-08-09 06:44:38,145 - DEBUG - SEGC init: n_qubits=7, coarse_mask=****0000, target=1010000, k_c=2, k_f=3
+2025-08-09 06:44:38,145 - DEBUG - SEGC config: k_c=2, k_f=3
+2025-08-09 06:44:38,145 - DEBUG - Initialized uniform superposition
+2025-08-09 06:44:38,145 - INFO - Running 2 coarse iterations
+2025-08-09 06:44:38,146 - DEBUG - Applied coarse oracle
+2025-08-09 06:44:38,146 - DEBUG - Applied coarse diffuser
+2025-08-09 06:44:38,146 - DEBUG - Applied coarse oracle
+2025-08-09 06:44:38,146 - DEBUG - Applied coarse diffuser
+2025-08-09 06:44:38,147 - INFO - Completed 2 coarse iterations
+2025-08-09 06:44:38,249 - DEBUG - Coarse states: ['0000000', '0000000', '0000001', '0000001', '0000010']...
+2025-08-09 06:44:38,249 - INFO - Coarse phase yielded 16 candidate states
+2025-08-09 06:44:38,249 - DEBUG - Applied fine oracle for states: ['0000101']
+2025-08-09 06:44:38,249 - DEBUG - Running 3 fine iterations
+2025-08-09 06:44:38,249 - DEBUG - Starting 3 fine iterations
+2025-08-09 06:44:38,249 - DEBUG - Fine iteration 1/3
+2025-08-09 06:44:38,250 - DEBUG - Applied fine oracle for states: ['0000101']
+2025-08-09 06:44:38,250 - DEBUG - Coarse indices for diffuser: [0, 1, 2, 3]
+2025-08-09 06:44:38,250 - DEBUG - Applied partial diffuser
+2025-08-09 06:44:38,250 - DEBUG - Fine iteration 2/3
+2025-08-09 06:44:38,250 - DEBUG - Applied fine oracle for states: ['0000101']
+2025-08-09 06:44:38,250 - DEBUG - Coarse indices for diffuser: [0, 1, 2, 3]
+2025-08-09 06:44:38,250 - DEBUG - Applied partial diffuser
+2025-08-09 06:44:38,250 - DEBUG - Fine iteration 3/3
+2025-08-09 06:44:38,250 - DEBUG - Applied fine oracle for states: ['0000101']
+2025-08-09 06:44:38,250 - DEBUG - Coarse indices for diffuser: [0, 1, 2, 3]
+2025-08-09 06:44:38,250 - DEBUG - Applied partial diffuser
+2025-08-09 06:44:38,250 - INFO - Completed 3 fine iterations
+2025-08-09 06:44:38,412 - DEBUG - Post-fine statevector probs: [('0100000', 0.023301694542166504), ('0000000', 0.00015655532479284405), ('1110000', 0.00015655532479284402), ('0010000', 0.0001565553247928416), ('0110000', 0.00015655532479284158)]
+2025-08-09 06:44:38,466 - DEBUG - Measurement counts (top 5): [('1110100', 5066), ('1110010', 5030), ('1110110', 5011), ('1110101', 4964), ('1111111', 4942)]
+2025-08-09 06:44:38,466 - INFO - Baseline SEGC top-5 outcomes: [('1010000', 0.04637), ('0100000', 0.00037), ('0010000', 0.00035), ('1000000', 0.00034), ('0110000', 0.0003)]
+2025-08-09 06:44:38,466 - INFO - Baseline SEGC Run 1: Target prob=0.0464, Coarse prob=0.0484, η=0.0678
+2025-08-09 06:44:38,466 - INFO - Starting QSVM-enhanced SEGC with k=1
+2025-08-09 06:44:38,466 - INFO - Auto-set iterations: coarse=2, fine=3 (Nc=16)
+2025-08-09 06:44:38,466 - DEBUG - SEGC init: n_qubits=7, coarse_mask=****0000, target=1010000, k_c=2, k_f=3
+2025-08-09 06:44:38,466 - DEBUG - SEGC config: k_c=2, k_f=3
+2025-08-09 06:44:38,466 - DEBUG - Initialized uniform superposition
+2025-08-09 06:44:38,466 - INFO - Running 2 coarse iterations
+2025-08-09 06:44:38,466 - DEBUG - Applied coarse oracle
+2025-08-09 06:44:38,467 - DEBUG - Applied coarse diffuser
+2025-08-09 06:44:38,467 - DEBUG - Applied coarse oracle
+2025-08-09 06:44:38,467 - DEBUG - Applied coarse diffuser
+2025-08-09 06:44:38,467 - INFO - Completed 2 coarse iterations
+2025-08-09 06:44:38,578 - DEBUG - Coarse states: ['0000000', '0000000', '0000001', '0000001', '0000010']...
+2025-08-09 06:44:38,578 - INFO - Coarse phase yielded 16 candidate states
+2025-08-09 06:44:38,578 - DEBUG - QSVM init: feature_map_type=statevector, feature_dim=7
+2025-08-09 06:44:38,578 - INFO - Training QSVM on 16 samples
+2025-08-15 00:32:15,862 - INFO - Run 1/30 for k=1
+2025-08-15 00:32:15,862 - INFO - Starting baseline SEGC
+2025-08-15 00:32:15,862 - INFO - Auto-set iterations: coarse=2, fine=3 (Nc=16)
+2025-08-15 00:32:15,862 - DEBUG - SEGC init: n_qubits=7, coarse_mask=****0000, target=1010000, k_c=2, k_f=3
+2025-08-15 00:32:15,862 - DEBUG - SEGC config: k_c=2, k_f=3
+2025-08-15 00:32:15,862 - DEBUG - Initialized uniform superposition
+2025-08-15 00:32:15,862 - INFO - Running 2 coarse iterations
+2025-08-15 00:32:15,863 - DEBUG - Applied coarse oracle
+2025-08-15 00:32:15,863 - DEBUG - Applied coarse diffuser
+2025-08-15 00:32:15,863 - DEBUG - Applied coarse oracle
+2025-08-15 00:32:15,863 - DEBUG - Applied coarse diffuser
+2025-08-15 00:32:15,863 - INFO - Completed 2 coarse iterations
+2025-08-15 00:32:15,975 - DEBUG - Coarse states: ['0000000', '0000000', '0000001', '0000001', '0000010']...
+2025-08-15 00:32:15,975 - INFO - Coarse phase yielded 16 candidate states
+2025-08-15 00:32:15,976 - DEBUG - Applied fine oracle for states: ['0000101']
+2025-08-15 00:32:15,976 - DEBUG - Running 3 fine iterations
+2025-08-15 00:32:15,976 - DEBUG - Starting 3 fine iterations
+2025-08-15 00:32:15,976 - DEBUG - Fine iteration 1/3
+2025-08-15 00:32:15,976 - DEBUG - Applied fine oracle for states: ['0000101']
+2025-08-15 00:32:15,976 - DEBUG - Coarse indices for diffuser: [0, 1, 2, 3]
+2025-08-15 00:32:15,976 - DEBUG - Applied partial diffuser
+2025-08-15 00:32:15,976 - DEBUG - Fine iteration 2/3
+2025-08-15 00:32:15,976 - DEBUG - Applied fine oracle for states: ['0000101']
+2025-08-15 00:32:15,976 - DEBUG - Coarse indices for diffuser: [0, 1, 2, 3]
+2025-08-15 00:32:15,976 - DEBUG - Applied partial diffuser
+2025-08-15 00:32:15,976 - DEBUG - Fine iteration 3/3
+2025-08-15 00:32:15,976 - DEBUG - Applied fine oracle for states: ['0000101']
+2025-08-15 00:32:15,976 - DEBUG - Coarse indices for diffuser: [0, 1, 2, 3]
+2025-08-15 00:32:15,977 - DEBUG - Applied partial diffuser
+2025-08-15 00:32:15,977 - INFO - Completed 3 fine iterations
+2025-08-15 00:32:16,137 - DEBUG - Post-fine statevector probs: [('0100000', 0.023301694542166504), ('0000000', 0.00015655532479284405), ('1110000', 0.00015655532479284402), ('0010000', 0.0001565553247928416), ('0110000', 0.00015655532479284158)]
+2025-08-15 00:32:16,189 - DEBUG - Measurement counts (top 5): [('1111000', 5075), ('1111111', 5058), ('1111001', 5028), ('1110010', 4987), ('1110001', 4939)]
+2025-08-15 00:32:16,190 - INFO - Baseline SEGC top-5 outcomes: [('1010000', 0.04552), ('1110000', 0.00036), ('0110000', 0.00032), ('1000000', 0.00031), ('0000000', 0.00027)]
+2025-08-15 00:32:16,190 - INFO - Baseline SEGC Run 1: Target prob=0.0455, Coarse prob=0.0474, η=0.0666
+2025-08-15 00:32:16,190 - INFO - Starting QSVM-enhanced SEGC with k=1
+2025-08-15 00:32:16,190 - INFO - Auto-set iterations: coarse=2, fine=3 (Nc=16)
+2025-08-15 00:32:16,190 - DEBUG - SEGC init: n_qubits=7, coarse_mask=****0000, target=1010000, k_c=2, k_f=3
+2025-08-15 00:32:16,190 - DEBUG - SEGC config: k_c=2, k_f=3
+2025-08-15 00:32:16,190 - DEBUG - Initialized uniform superposition
+2025-08-15 00:32:16,190 - INFO - Running 2 coarse iterations
+2025-08-15 00:32:16,190 - DEBUG - Applied coarse oracle
+2025-08-15 00:32:16,190 - DEBUG - Applied coarse diffuser
+2025-08-15 00:32:16,191 - DEBUG - Applied coarse oracle
+2025-08-15 00:32:16,191 - DEBUG - Applied coarse diffuser
+2025-08-15 00:32:16,191 - INFO - Completed 2 coarse iterations
+2025-08-15 00:32:16,302 - DEBUG - Coarse states: ['0000000', '0000000', '0000001', '0000001', '0000010']...
+2025-08-15 00:32:16,302 - INFO - Coarse phase yielded 16 candidate states
+2025-08-15 00:32:16,302 - DEBUG - QSVM init: feature_map_type=statevector, feature_dim=7
+2025-08-15 00:32:16,302 - INFO - Training QSVM on 16 samples

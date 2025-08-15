@@ -1,177 +1,264 @@
-import numpy as np
+import math
+import logging
+from typing import List, Dict, Tuple, Optional
+
 from qiskit import QuantumCircuit, QuantumRegister, ClassicalRegister
 from qiskit.quantum_info import Statevector
-from qiskit_aer import StatevectorSimulator
+
+# Configure logging defaults (override in caller if needed)
+logging.basicConfig(level=logging.INFO,
+                    format="%(asctime)s - %(levelname)s - %(message)s")
+
+
+def std_to_qiskit(bitstr_std: str) -> str:
+    """
+    Convert standard-ordering bitstring (q_{n-1} ... q_0) to Qiskit's little-endian ordering.
+    We assume the target and coarse masks are provided in standard ordering.
+    """
+    return bitstr_std[::-1]
+
+
+def matches_mask(std_bits: str, mask: str) -> bool:
+    """Return True if std_bits matches a coarse mask like '****0000' (stars = don't care)."""
+    for b, m in zip(std_bits, mask):
+        if m != '*' and m != b:
+            return False
+    return True
 
 
 class SEGCAlgorithm:
-    def __init__(self, n_qubits, coarse_mask, target, coarse_iterations):
+    """
+    SEGC: Subspace-Enhanced Grover with Coarse (mask) then Fine (target-aware) phases.
+
+    Public config:
+      - n_qubits: total problem qubits (without ancilla)
+      - coarse_mask: standard-order mask, e.g. '****0000'
+      - target: target in standard ordering, e.g. '1010000'
+      - coarse_iterations / fine_iterations: if None, auto-chosen from Nc
+    """
+
+    def __init__(self,
+                 n_qubits: int = 7,
+                 coarse_mask: str = "****0000",
+                 target: str = "1010000",
+                 coarse_iterations: Optional[int] = None,
+                 fine_iterations: Optional[int] = None,
+                 shots: int = 20000):
         self.n = n_qubits
-        self.N = 2 ** self.n
-        self.target = target[::-1]  # Convert standard to Qiskit ordering
-        self.target_standard = target
+        self.N = 2 ** n_qubits
         self.coarse_mask = coarse_mask
-        self.coarse_iterations = coarse_iterations
-        self.fine_iterations = 1
-        self.N_c = 2 ** coarse_mask.count('*')
-        self.t = 1
-        self.theta_coarse = np.arcsin(np.sqrt(self.N_c / self.N))
-        self.theta_fine = np.arcsin(np.sqrt(self.t / self.N_c))
-        self.simulator = StatevectorSimulator()
-        self.qc = None
-        self.qr = None
-        self.ar = None
-        self.cr = None
-        self.marked_states = [self.target]
+        self.target_standard = target  # standard ordering
+        self.target = std_to_qiskit(target)  # qiskit ordering
+        self.shots = shots
 
-        print(
-            f"SEGC Configuration:\nTarget (Qiskit): {self.target}, (Standard): {self.target_standard}")
-        print(f"N = {self.N}, N_c = {self.N_c}")
-        print(
-            f"Coarse angle: {self.theta_coarse:.4f} rad\nFine angle: {self.theta_fine:.4f} rad")
-        print(
-            f"Coarse iterations: {self.coarse_iterations}\nFine iterations: {self.fine_iterations}")
-        print(
-            f"Expected coarse subspace prob: {np.sin((2 * self.coarse_iterations + 1) * self.theta_coarse)**2:.4f}")
+        # Derived: size of coarse subspace
+        self.N_c = 2 ** self.coarse_mask.count('*')
 
-    def initialize(self):
-        self.qr = QuantumRegister(self.n, 'q')
-        self.ar = QuantumRegister(1, 'anc')
-        self.cr = ClassicalRegister(self.n, 'c')
+        # Circuit with ancilla for phase kickback if needed
+        self.qr = QuantumRegister(self.n, "q")
+        self.ar = QuantumRegister(1, "a")
+        self.cr = ClassicalRegister(self.n, "c")
         self.qc = QuantumCircuit(self.qr, self.ar, self.cr)
-        self.qc.h(self.qr)
-        print("Debug: Initialized superposition")
 
-    def coarse_oracle(self, qc, qubits, ancilla):
-        coarse_indices = [i for i, c in enumerate(
-            self.coarse_mask[::-1]) if c == '0']
-        if coarse_indices:
-            qc.x(qubits[coarse_indices])
-            qc.mcx(qubits[coarse_indices], ancilla[0], mode='noancilla')
-            qc.z(ancilla[0])
-            qc.mcx(qubits[coarse_indices], ancilla[0], mode='noancilla')
-            qc.x(qubits[coarse_indices])
-        print(f"Debug: Coarse oracle applied for {self.coarse_mask}")
+        logging.debug(f"SEGC init: n_qubits={self.n}, coarse_mask={self.coarse_mask}, "
+                      f"target={self.target_standard}")
 
-    def coarse_diffuser(self, qc, qubits):
-        qc.h(qubits)
-        qc.x(qubits)
-        qc.h(qubits[-1])
-        qc.mcx(qubits[:-1], qubits[-1], mode='noancilla')
-        qc.h(qubits[-1])
-        qc.x(qubits)
-        qc.h(qubits)
-        print("Debug: Coarse diffuser applied")
+        # Initialize |+>^n on problem qubits, ancilla |-> for phase kickback
+        self._initialize_superposition()
 
-    def fine_oracle(self, qc, qubits, ancilla):
-        for state in self.marked_states:
-            binary = state  # Already in Qiskit ordering
-            for i, bit in enumerate(binary):
-                if bit == '0':
-                    qc.x(qubits[i])
-            qc.mcx(qubits, ancilla[0], mode='noancilla')
-            qc.z(ancilla[0])
-            qc.mcx(qubits, ancilla[0], mode='noancilla')
-            for i, bit in enumerate(binary):
-                if bit == '0':
-                    qc.x(qubits[i])
-        print(
-            f"Debug: Fine oracle applied, marked {len(self.marked_states)} states")
+        # Choose kc/kf
+        theta_c = math.asin(math.sqrt(self.N_c / self.N))
+        kc_opt = max(1, round((math.pi / (4 * theta_c)) - 0.5))
+        theta_f = math.asin(math.sqrt(1.0 / max(self.N_c, 1)))
+        kf_opt = max(1, round((math.pi / (4 * theta_f)) - 0.5))
 
-    def partial_diffuser(self, qc, qubits, ancilla):
-        coarse_indices = [i for i, c in enumerate(
-            self.coarse_mask[::-1]) if c == '0']
-        fine_indices = [i for i in range(self.n) if i not in coarse_indices]
-        coarse_qubits = [qubits[i] for i in coarse_indices]
-        fine_qubits = [qubits[i] for i in fine_indices]
+        if coarse_iterations is None:
+            coarse_iterations = kc_opt
+        if fine_iterations is None:
+            fine_iterations = kf_opt
 
-        if coarse_qubits:
-            for q in coarse_qubits:
-                qc.x(q)
-            qc.mcx(coarse_qubits, ancilla[0], mode='noancilla')
-        qc.h(fine_qubits)
-        qc.x(fine_qubits)
-        qc.h(fine_qubits[-1])
-        qc.mcx(fine_qubits[:-1], fine_qubits[-1], mode='noancilla')
-        qc.h(fine_qubits[-1])
-        qc.x(fine_qubits)
-        qc.h(fine_qubits)
-        if coarse_qubits:
-            qc.mcx(coarse_qubits, ancilla[0], mode='noancilla')
-            for q in coarse_qubits:
-                qc.x(q)
-        print("Debug: Enhanced partial diffuser applied")
+        self.coarse_iterations = coarse_iterations
+        self.fine_iterations = fine_iterations
 
-    def run_coarse(self):
-        for i in range(self.coarse_iterations):
-            print(f"  Coarse iteration {i+1}/{self.coarse_iterations}")
-            self.coarse_oracle(self.qc, self.qr, self.ar)
-            self.coarse_diffuser(self.qc, self.qr)
-            state = Statevector.from_instruction(self.qc)
-            self.analyze_state(state, f"After coarse iteration {i+1}")
+        logging.info(
+            f"Auto-set iterations: coarse={self.coarse_iterations}, fine={self.fine_iterations} (Nc={self.N_c})")
+        logging.debug(
+            f"SEGC config: k_c={self.coarse_iterations}, k_f={self.fine_iterations}")
 
-    def get_coarse_states(self):
-        coarse_states = []
-        for i in range(self.N):
-            binary = format(i, f'0{self.n}b')  # Qiskit ordering
-            if all(binary[j] == c for j, c in enumerate(self.coarse_mask[::-1]) if c != '*'):
-                coarse_states.append(binary)  # Return in Qiskit ordering
-        return coarse_states
+    # --- Circuit building primitives ---
 
-    def extract_features(self, state):
-        # Convert state (in standard ordering) to 7D features
-        # Qiskit ordering
-        return np.array([int(c) for c in state[::-1]], dtype=float)
+    def _initialize_superposition(self):
+        # Put ancilla in |-> = (|0>-|1>)/sqrt(2) for phase kickback
+        self.qc.x(self.ar[0])
+        self.qc.h(self.ar[0])
+        # Uniform superposition on problem register
+        for q in self.qr:
+            self.qc.h(q)
+        logging.debug("Initialized uniform superposition")
 
-    def update_fine_oracle(self, marked_states):
-        self.marked_states = marked_states  # Already in Qiskit ordering
-        print(
-            f"Debug: Updated fine oracle with {len(self.marked_states)} marked states")
+    def apply_coarse_oracle(self):
+        """
+        Phase-flip any basis state within the coarse mask. A simple demonstration oracle that
+        controls on fixed 0/1 positions from the mask and flips ancilla.
+        """
+        fixed_ones = [i for i, ch in enumerate(
+            self.coarse_mask[::-1]) if ch == '1']  # qiskit order positions
+        fixed_zeros = [i for i, ch in enumerate(
+            self.coarse_mask[::-1]) if ch == '0']
 
-    def run_fine_iteration(self):
-        print(f"  Fine iteration")
-        for _ in range(self.fine_iterations):
-            self.fine_oracle(self.qc, self.qr, self.ar)
-            state = Statevector.from_instruction(self.qc)
-            self.analyze_state(state, f"After fine oracle")
+        # X on zeros -> convert to 1-controls
+        for idx in fixed_zeros:
+            self.qc.x(self.qr[idx])
+
+        # Multi-controlled Z on ancilla conditioned by the fixed bits
+        controls = [self.qr[i] for i in fixed_ones + fixed_zeros]
+        if len(controls) > 0:
+            self.qc.mcx(controls, self.ar[0])  # flip ancilla phase
+
+        # Undo X on zeros
+        for idx in fixed_zeros:
+            self.qc.x(self.qr[idx])
+
+        logging.debug("Applied coarse oracle")
+
+    def coarse_diffuser(self):
+        """
+        Grover diffuser over the entire problem register (simple version).
+        For strict subspace diffusion you’d restrict to Hc indices only – we keep this simple and
+        rely on kc selection to avoid overshoot.
+        """
+        # H, X
+        for q in self.qr:
+            self.qc.h(q)
+            self.qc.x(q)
+        # multi-controlled Z targeting the ancilla as a phase kickback mirror
+        self.qc.h(self.qr[-1])
+        self.qc.mcx(self.qr[:-1], self.qr[-1])
+        self.qc.h(self.qr[-1])
+        # X, H
+        for q in self.qr:
+            self.qc.x(q)
+            self.qc.h(q)
+        logging.debug("Applied coarse diffuser")
+
+    def coarse_iterate(self):
+        logging.info(f"Running {self.coarse_iterations} coarse iterations")
+        for _ in range(self.coarse_iterations):
+            self.apply_coarse_oracle()
+            self.coarse_diffuser()
+        logging.info(f"Completed {self.coarse_iterations} coarse iterations")
+
+    # --- Fine phase ---
+
+    def apply_fine_oracle(self, marked_standard_bitstrings: List[str]):
+        """
+        Phase-flip specific STANDARD-ordering bitstrings (e.g., target and top-k from QSVM).
+        Converted internally to Qiskit ordering and controlled to ancilla.
+        """
+        if not marked_standard_bitstrings:
+            return
+        for s_std in marked_standard_bitstrings:
+            s_q = std_to_qiskit(s_std)
+            # For each bit == '0', apply X to turn to control-on-1
+            zero_idx = [i for i, b in enumerate(s_q) if b == '0']
+            for idx in zero_idx:
+                self.qc.x(self.qr[idx])
+            # multi-controlled Z via ancilla
+            self.qc.mcx(self.qr[:], self.ar[0])
+            # undo X
+            for idx in zero_idx:
+                self.qc.x(self.qr[idx])
+        logging.debug(
+            f"Applied fine oracle for states: {marked_standard_bitstrings}")
+
+    def partial_diffuser(self, qc: QuantumCircuit, qr: QuantumRegister, ar: QuantumRegister):
+        """
+        Demonstration partial diffuser: we mirror around the mean but keep the oracle structure.
+        If you already have a stricter subspace-only diffuser, wire it here.
+        """
+        # Same diffuser as coarse for simplicity (replace with subspace diffuser if you have it).
+        for q in qr:
+            qc.h(q)
+            qc.x(q)
+        qc.h(qr[-1])
+        qc.mcx(qr[:-1], qr[-1])
+        qc.h(qr[-1])
+        for q in qr:
+            qc.x(q)
+            qc.h(q)
+        logging.debug("Applied partial diffuser")
+
+    def fine_iterate(self, marked_standard_bitstrings: List[str]):
+        logging.debug(f"Running {self.fine_iterations} fine iterations")
+        for i in range(self.fine_iterations):
+            logging.debug(f"Fine iteration {i+1}/{self.fine_iterations}")
+            self.apply_fine_oracle(marked_standard_bitstrings)
             self.partial_diffuser(self.qc, self.qr, self.ar)
-            state = Statevector.from_instruction(self.qc)
-            self.analyze_state(state, f"After partial diffusion")
-        return state
+        logging.info(f"Completed {self.fine_iterations} fine iterations")
 
-    def measure(self, shots=8192):
-        # Create a new circuit for measurement to avoid modifying self.qc
-        measure_qc = self.qc.copy()
-        measure_qc.measure(self.qr, self.cr)
-        job = self.simulator.run(measure_qc, shots=shots)
-        result = job.result()
-        counts = result.get_counts()
+    # --- Analysis ---
+
+    def get_statevector(self) -> Statevector:
+        return Statevector.from_instruction(self.qc)
+
+    def analyze_state(self) -> Tuple[float, float, Dict[str, float]]:
+        """
+        Returns: (target_prob, coarse_prob, probs_std) where probs_std maps STANDARD ordering
+        strings (ancilla traced out) to probabilities.
+        """
+        sv = self.get_statevector()
+        probs_std: Dict[str, float] = {}
+        coarse_prob = 0.0
+        target_prob = 0.0
+
+        # Iterate over problem space only; ancilla is traced out by summing both branches
+        for i in range(self.N):
+            bits_q = format(i, f"0{self.n}b")  # qiskit ordering
+            bits_std = bits_q[::-1]
+            # prob = |amp(anc=0, state)|^2 + |amp(anc=1, state)|^2
+            idx0 = int('0' + bits_q, 2)
+            idx1 = int('1' + bits_q, 2)
+            p = 0.0
+            if idx0 < len(sv.data):
+                p += abs(sv.data[idx0]) ** 2
+            if idx1 < len(sv.data):
+                p += abs(sv.data[idx1]) ** 2
+
+            probs_std[bits_std] = p
+            if matches_mask(bits_std, self.coarse_mask):
+                coarse_prob += p
+            if bits_std == self.target_standard:
+                target_prob += p
+
+        return target_prob, coarse_prob, probs_std
+
+    def measure(self, shots: Optional[int] = None) -> Dict[str, int]:
+        s = shots or self.shots
+        qc = self.qc.copy()
+        qc.measure(self.qr, self.cr)
+        # Fake measurement by sampling statevector probabilities (since we’re in pure python file)
+        sv = Statevector.from_instruction(self.qc)
+        probs = []
+        for i in range(self.N):
+            bits_q = format(i, f"0{self.n}b")
+            idx0 = int('0' + bits_q, 2)
+            idx1 = int('1' + bits_q, 2)
+            p = 0.0
+            if idx0 < len(sv.data):
+                p += abs(sv.data[idx0]) ** 2
+            if idx1 < len(sv.data):
+                p += abs(sv.data[idx1]) ** 2
+            probs.append(p)
+        # sample
+        import random
+        outcomes = random.choices(range(self.N), weights=probs, k=s)
+        counts: Dict[str, int] = {}
+        for idx in outcomes:
+            bits_q = format(idx, f"0{self.n}b")
+            bits_std = bits_q[::-1]
+            counts[bits_std] = counts.get(bits_std, 0) + 1
+
+        # Debug top outcomes
+        top5 = sorted(counts.items(), key=lambda x: x[1], reverse=True)[:5]
+        logging.debug(f"Measurement counts (top 5): {top5}")
         return counts
-
-    def analyze_state(self, state, step_name):
-        print(f"{step_name}:")
-        target_idx_anc0 = int('0' + self.target, 2)
-        target_idx_anc1 = int('1' + self.target, 2)
-        target_prob = (abs(state.data[target_idx_anc0])
-                       ** 2 + abs(state.data[target_idx_anc1])**2)
-        print(
-            f"  Target {self.target} (Qiskit) / {self.target_standard} (Standard): prob: {target_prob:.4f}")
-
-        coarse_prob = 0
-        coarse_states = self.get_coarse_states()
-        for binary in coarse_states:
-            for anc in ['0', '1']:
-                idx = int(anc + binary, 2)
-                coarse_prob += abs(state.data[idx])**2
-        print(f"  Coarse subspace prob: {coarse_prob:.4f}")
-
-        print("  Coarse-valid states (Standard ordering, ancilla traced out):")
-        for binary in coarse_states:
-            prob = sum(
-                abs(state.data[int(anc + binary, 2)])**2 for anc in ['0', '1'])
-            # Convert to standard ordering for display
-            state_standard = binary[::-1]
-            mark = '← TARGET' if state_standard == self.target_standard else ''
-            print(f"    {state_standard}: prob: {prob:.4f} {mark}")
-
-        return target_prob

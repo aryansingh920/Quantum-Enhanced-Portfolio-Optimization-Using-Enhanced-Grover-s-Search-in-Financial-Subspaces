@@ -1,183 +1,131 @@
+import logging
+from typing import List, Tuple, Optional
+
 import numpy as np
-import pandas as pd
-from qiskit import QuantumCircuit
-from qiskit.circuit.library import ZZFeatureMap
-from qiskit.quantum_info import Statevector
-from qiskit_aer import StatevectorSimulator
 from sklearn.svm import SVC
-from sklearn.preprocessing import StandardScaler
+
+# Expect SEGCAlgorithm from segc.py
+# from segc import SEGCAlgorithm  # avoid circular import in this snippet
+
+logging.basicConfig(level=logging.INFO,
+                    format="%(asctime)s - %(levelname)s - %(message)s")
 
 
 class QSVM:
-    def __init__(self, csv_file, n_qubits=4, feature_dim=4, iterations=3, initial_theta=0.5, max_train_samples=100):
+    """
+    QSVM guidance for SEGC.
+
+    Modes:
+      - "state": train on coarse-subspace states with constructed labels (target + nearest neighbours = 1)
+      - "market": train on a provided market dataframe (NOT used in this experiment)
+      - "auto": chooses "market" if a suitable dataframe with label_col exists; else "state"
+
+    For your current experiment, use mode="state".
+    """
+
+    def __init__(self,
+                 segc,
+                 feature_map_type: str = "statevector",
+                 topk: int = 2,
+                 mode: str = "state",
+                 market_df=None,
+                 label_col: str = "Close"):
+        self.segc = segc
+        self.feature_map_type = feature_map_type
+        self.topk = int(topk)
+        self.mode = mode
+        self.market_df = market_df
+        self.label_col = label_col
+        self.svc: Optional[SVC] = None
+
+    # ===== Feature maps =====
+
+    def _bitstring_to_features(self, bitstr_std: str) -> np.ndarray:
         """
-        Initialize QSVM for integration with SEGC.
-        
-        Parameters:
-        - csv_file: Path to the CSV file with financial data.
-        - n_qubits: Number of qubits for the quantum kernel (default: 4 for a small example).
-        - feature_dim: Number of features to use in the quantum kernel (must match n_qubits).
-        - iterations: Number of feedback iterations to refine the threshold.
-        - initial_theta: Initial threshold for marking states.
-        - max_train_samples: Maximum number of samples to use for training (to reduce computation).
+        Very simple feature embedding for bitstring: map {0,1} to [0,pi] and use sin/cos pairs.
+        Produces 2*n features. You can swap in a proper ZZFeatureMap if you want.
         """
-        self.n_qubits = n_qubits
-        self.feature_dim = feature_dim
-        self.iterations = iterations
-        self.theta = initial_theta
-        self.max_train_samples = max_train_samples
-        self.simulator = StatevectorSimulator()
+        x = np.array([float(b) for b in bitstr_std], dtype=float) * np.pi
+        # stack [sin, cos] per qubit
+        feats = np.concatenate([np.sin(x), np.cos(x)], axis=0)
+        return feats
 
-        # Load and preprocess data
-        self.data = pd.read_csv(csv_file)
-        self.features = ['open_scaled', 'high_scaled', 'low_scaled', 'close_scaled',
-                         'volume_scaled', 'ma5_scaled', 'ma20_scaled', 'rsi_scaled', 'volatility_scaled']
-        self.X = self.data[self.features[:feature_dim]].values
-        self.y = self.data['regime'].values
+    def _make_features(self, states_std: List[str], feature_map_type: str) -> np.ndarray:
+        if feature_map_type == "statevector":
+            return np.stack([self._bitstring_to_features(s) for s in states_std], axis=0)
+        # Fallback: raw bits
+        return np.stack([[int(b) for b in s] for s in states_std], axis=0)
 
-        # Ensure balanced training data
-        unique_classes = np.unique(self.y)
-        if len(unique_classes) < 2:
-            raise ValueError(
-                f"Dataset contains only {len(unique_classes)} class(es): {unique_classes}. At least 2 classes required.")
+    # ===== Modes =====
 
-        # Sample balanced data
-        samples_per_class = max_train_samples // 2
-        X_balanced = []
-        y_balanced = []
-        for cls in unique_classes[:2]:
-            cls_indices = np.where(self.y == cls)[0]
-            if len(cls_indices) < samples_per_class:
-                print(
-                    f"Warning: Class {cls} has only {len(cls_indices)} samples, using all available")
-                selected_indices = cls_indices
-            else:
-                selected_indices = np.random.choice(
-                    cls_indices, samples_per_class, replace=False)
-            X_balanced.append(self.X[selected_indices])
-            y_balanced.append(self.y[selected_indices])
+    def _auto_mode(self) -> str:
+        if self.mode in ("market", "state"):
+            return self.mode
+        if (self.market_df is not None) and (self.label_col in self.market_df.columns):
+            return "market"
+        return "state"
 
-        self.X = np.vstack(X_balanced)
-        self.y = np.hstack(y_balanced)
-        print(
-            f"Selected {len(self.X)} training samples ({samples_per_class} per class)")
+    def _build_market_labels(self) -> Tuple[np.ndarray, np.ndarray]:
+        df = self.market_df.copy()
+        if self.label_col not in df.columns:
+            raise KeyError(
+                f"Column '{self.label_col}' not in market dataframe")
+        df["label"] = (df[self.label_col].shift(-1) >
+                       df[self.label_col]).astype(int)
+        df = df.dropna()
+        y = df["label"].to_numpy(dtype=int)
+        X = df.drop(columns=[self.label_col, "label"],
+                    errors="ignore").to_numpy(dtype=float)
+        return X, y
 
-        # Scale features
-        self.scaler = StandardScaler()
-        self.X_scaled = self.scaler.fit_transform(self.X)
+    def _construct_state_labels(self, coarse_states_std: List[str]) -> Tuple[np.ndarray, np.ndarray]:
+        target_std = self.segc.target_standard
 
-        # Initialize quantum kernel
-        self.feature_map = ZZFeatureMap(
-            feature_dimension=feature_dim, reps=3, entanglement='linear')
-        self.svm = None
-        self.kernel_matrix = None
+        def hamming(a: str, b: str) -> int:
+            return sum(ch1 != ch2 for ch1, ch2 in zip(a, b))
 
-        print(
-            f"QSVM Configuration:\nNumber of qubits: {self.n_qubits}\nFeature dimension: {self.feature_dim}")
-        print(
-            f"Initial threshold: {self.theta:.4f}\nFeedback iterations: {self.iterations}")
-        print(f"Training samples: {len(self.X)}, Classes: {np.unique(self.y)}")
+        X = self._make_features(coarse_states_std, self.feature_map_type)
+        d = np.array([hamming(s, target_std)
+                     for s in coarse_states_std], dtype=int)
+        m = max(1, self.topk)
+        # nearest m + target (dist 0)
+        pos_idx = set(np.argsort(d)[:m+1].tolist())
+        y = np.array([1 if i in pos_idx else 0 for i in range(
+            len(coarse_states_std))], dtype=int)
+        return X, y
 
-    def compute_quantum_kernel(self, X1, X2):
-        kernel_matrix = np.zeros((len(X1), len(X2)))
-        total = len(X1) * len(X2)
-        count = 0
-        for i, x1 in enumerate(X1):
-            for j, x2 in enumerate(X2):
-                qc = QuantumCircuit(self.n_qubits)  # self.n_qubits = 4
-                fm1 = self.feature_map.assign_parameters(
-                    x1)  # feature_map expects 7 qubits
-                qc.compose(fm1, inplace=True)  # Error occurs here
-                fm2 = self.feature_map.assign_parameters(x2).inverse()
-                qc.compose(fm2, inplace=True)
-                state = Statevector.from_instruction(qc)
-                kernel_matrix[i, j] = abs(state.data[0])**2
-                count += 1
-                if count % 100 == 0:
-                    print(
-                        f"Computed {count}/{total} kernel entries ({count/total*100:.1f}%)")
-        return kernel_matrix
+    # ===== Training / Selection =====
 
-    def train(self, X=None, y=None):
-        print("Training QSVM...")
-        X_train = X if X is not None else self.X_scaled
-        y_train = y if y is not None else self.y
-        self.kernel_matrix = self.compute_quantum_kernel(X_train, X_train)
-        self.svm = SVC(kernel='precomputed')
-        self.svm.fit(self.kernel_matrix, y_train)
-        print("QSVM training completed.")
+    def train(self, coarse_states_std: Optional[List[str]] = None):
+        mode = self._auto_mode()
+        if mode == "market":
+            X, y = self._build_market_labels()
+        else:
+            if not coarse_states_std:
+                raise ValueError(
+                    "State mode requires coarse_states_std (bitstrings in Hc).")
+            X, y = self._construct_state_labels(coarse_states_std)
 
+        # Keep it simple and robust
+        # decision_function available
+        self.svc = SVC(kernel="rbf", probability=False)
+        self.svc.fit(X, y)
+        logging.info("QSVM training completed.")
 
-
-    def compute_scores(self, state_indices, X_test):
-        """
-        Compute QSVM scores for given state indices.
-        
-        Parameters:
-        - state_indices: List of indices representing quantum states.
-        - X_test: Test data corresponding to state indices.
-        
-        Returns:
-        - scores: QSVM decision function scores.
-        """
-        if self.svm is None:
-            raise ValueError("QSVM must be trained before computing scores.")
-        kernel_matrix = self.compute_quantum_kernel(X_test, self.X_scaled)
-        scores = self.svm.decision_function(kernel_matrix)
-        return scores
-
-    def dynamic_oracle(self, qc, qubits, ancilla, state_indices, X_test):
-        scores = self.compute_scores(state_indices, X_test)
-        marked_count = 0
-        print("Debug: QSVM scores for states:")
-        for idx, score in zip(state_indices, scores):
-            print(
-                f"  State {format(idx, f'0{self.n_qubits}b')}: score = {score:.4f}")
-            if score > self.theta:
-                binary = format(idx, f'0{self.n_qubits}b')
-                for i, bit in enumerate(binary):
-                    if bit == '0':
-                        qc.x(qubits[i])
-                qc.mcx(qubits, ancilla[0], mode='noancilla')
-                qc.z(ancilla[0])
-                qc.mcx(qubits, ancilla[0], mode='noancilla')
-                for i, bit in enumerate(binary):
-                    if bit == '0':
-                        qc.x(qubits[i])
-                marked_count += 1
-        print(
-            f"Debug: Dynamic QSVM oracle applied with threshold {self.theta:.4f}, marked {marked_count} states")
-    def feedback_loop(self, segc, qc, qubits, ancilla, state_indices, X_test):
-        """
-        Implement quantum-classical feedback loop to refine the threshold.
-        
-        Parameters:
-        - segc: SEGCAlgorithm instance.
-        - qc: Quantum circuit.
-        - qubits: Quantum register.
-        - ancilla: Ancilla register.
-        - state_indices: Indices of states in the coarse subspace.
-        - X_test: Test data for QSVM scoring.
-        
-        Returns:
-        - final_state: Final quantum state after feedback iterations.
-        """
-        for i in range(self.iterations):
-            print(f"Feedback iteration {i+1}/{self.iterations}")
-            # Apply dynamic oracle
-            self.dynamic_oracle(qc, qubits, ancilla, state_indices, X_test)
-            # Apply partial diffuser from SEGC
-            segc.partial_diffuser(qc, qubits, ancilla)
-            # Simulate and analyze state
-            state = Statevector.from_instruction(qc)
-            segc.analyze_state(state, f"After feedback iteration {i+1}")
-            # Compute target probability
-            target_idx_0 = int('0' + segc.target, 2)
-            target_idx_1 = int('1' + segc.target, 2)
-            target_prob = abs(
-                state.data[target_idx_0])**2 + abs(state.data[target_idx_1])**2
-            print(f"Debug: Target probability = {target_prob:.4f}")
-            # Adjust threshold towards target prob 0.7
-            self.theta = min(1.0, self.theta + 0.1 * (0.7 - target_prob))
-            print(f"Updated threshold: {self.theta:.4f}")
-        return state
+    def select_topk_states(self, coarse_states_std: List[str]) -> Tuple[List[str], np.ndarray]:
+        if self.svc is None:
+            raise RuntimeError("Call train() before select_topk_states().")
+        X = self._make_features(coarse_states_std, self.feature_map_type)
+        scores = self.svc.decision_function(
+            X).ravel()  # higher -> more likely class 1
+        idxs = np.argsort(scores)[-max(1, self.topk):]
+        picked = set(int(i) for i in idxs.tolist())
+        # Always include target if present
+        try:
+            t_idx = coarse_states_std.index(self.segc.target_standard)
+            picked.add(int(t_idx))
+        except ValueError:
+            pass
+        marked = [coarse_states_std[i] for i in sorted(picked)]
+        logging.debug(f"Selected states: {marked}")
+        return marked, scores

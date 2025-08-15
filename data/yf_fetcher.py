@@ -16,7 +16,7 @@ from sklearn.preprocessing import StandardScaler
 from datetime import date
 
 # ────────────────────────────────────────────────────────────────────────────────
-TICKER = sys.argv[1] if len(sys.argv) > 1 else "JPM"
+TICKER = sys.argv[1] if len(sys.argv) > 1 else "AAPL"
 START = "2000-01-01"
 END = str(date.today())
 
